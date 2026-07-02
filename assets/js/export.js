@@ -17,7 +17,6 @@ function generatePreview() {
         return;
     }
     
-    // Huidige pagina voor preview bepalen
     const currentPage = App.currentPage || 'index';
     
     let html = `
@@ -26,14 +25,14 @@ function generatePreview() {
                 <div style="font-size:24px; font-weight:800; color:#2d3748;">
                     ${App.logo ? `<img src="${App.logo}" style="max-height:40px;">` : (App.siteTitle || 'Mijn Website')}
                 </div>
-                <div style="display:flex; gap:20px; flex-wrap:wrap;">
+                <div style="display:flex; gap:20px; flex-wrap:wrap;" class="site-nav-links">
     `;
     
-    // Navigatie links - deze moeten binnen de preview blijven werken
     App.navItems.forEach(item => {
         const isActive = item.filename === currentPage;
         html += `
             <a href="#" onclick="showPreviewPage('${item.filename}'); return false;" 
+               data-filename="${item.filename}"
                style="color:${isActive ? App.primaryColor : '#4a5568'}; text-decoration:none; font-weight:${isActive ? '700' : '500'}; cursor:pointer;">
                 ${item.label}
             </a>
@@ -46,7 +45,6 @@ function generatePreview() {
             <div style="padding:30px;" id="previewContent">
     `;
     
-    // Toon de huidige pagina
     html += generatePageContent(currentPage);
     
     html += `
@@ -56,14 +54,12 @@ function generatePreview() {
     
     container.innerHTML = html;
     
-    // Voeg de preview navigatie functie toe aan het window object
     window.showPreviewPage = function(filename) {
         const contentContainer = document.getElementById('previewContent');
         if (contentContainer) {
             contentContainer.innerHTML = generatePageContent(filename);
         }
         
-        // Update actieve link in navigatie
         const links = document.querySelectorAll('#websitePreview .site-nav-links a');
         links.forEach(link => {
             const linkFilename = link.getAttribute('data-filename');
@@ -76,17 +72,11 @@ function generatePreview() {
             }
         });
         
-        // Update de titel
         const navItem = App.navItems.find(item => item.filename === filename);
         if (navItem) {
-            document.querySelector('#websitePreview .page-title')?.remove();
-            const titleEl = document.createElement('div');
-            titleEl.className = 'page-title';
-            titleEl.style.cssText = 'font-size:24px; font-weight:700; color:#2d3748; margin-bottom:20px; border-bottom:3px solid ' + (App.primaryColor || '#4f8cf7') + '; padding-bottom:12px;';
-            titleEl.textContent = navItem.label;
-            const contentContainer = document.getElementById('previewContent');
-            if (contentContainer) {
-                contentContainer.prepend(titleEl);
+            const titleEl = document.querySelector('#previewContent .page-title');
+            if (titleEl) {
+                titleEl.textContent = navItem.label;
             }
         }
     };
@@ -103,7 +93,6 @@ function generatePageContent(filename) {
     
     let pageHTML = renderLayersForExport(layers);
     
-    // Zoek de bijbehorende label
     const navItem = App.navItems.find(item => item.filename === filename);
     const label = navItem ? navItem.label : filename;
     
@@ -124,7 +113,6 @@ function renderLayersForExport(layers) {
         
         let contentHTML = layer.content || '';
         
-        // Image placeholder vervangen
         if (layer.type === 'image' && contentHTML.includes('upload-placeholder')) {
             contentHTML = '<p style="color:#a0aec0;">[Afbeelding plaatsen]</p>';
         }
@@ -155,7 +143,6 @@ function generateAndDownload() {
     const siteTitle = App.siteTitle || 'Mijn Website';
     const zip = new JSZip();
     
-    // Genereer voor elke pagina een apart HTML bestand
     App.navItems.forEach((item) => {
         const pageName = item.filename;
         const layers = App.layers[pageName] || [];
@@ -166,7 +153,6 @@ function generateAndDownload() {
             bgStyle += ` background-image: url(${bg.image}); background-size: cover; background-position: center;`;
         }
         
-        // Genereer navigatie voor deze pagina
         let navHTML = '';
         App.navItems.forEach(navItem => {
             const isActive = navItem.filename === pageName;
@@ -182,7 +168,6 @@ function generateAndDownload() {
         if (App.navStyle === 'vertical') navClass = 'nav-vertical';
         else if (App.navStyle === 'hamburger') navClass = 'nav-hamburger';
         
-        // Content voor deze pagina
         let contentHTML = renderLayersForExport(layers);
         
         const filename = pageName + '.html';
@@ -324,7 +309,6 @@ function generateAndDownload() {
         zip.file(filename, pageHTML);
     });
     
-    // Voeg extra bestanden toe
     zip.file("style.css", `/* Jouw eigen CSS hier */\n/* Primaire kleur: ${color} */`);
     zip.file("script.js", "// Jouw eigen JavaScript hier");
     
@@ -347,7 +331,11 @@ Gemaakt met SimpleSite
     zip.generateAsync({ type: "blob" })
         .then(function(content) {
             saveAs(content, `${siteTitle.toLowerCase().replace(/\s+/g, '-')}-website.zip`);
-            alert('✅ Download voltooid! Jouw website is klaar.');
+            
+            // ===== MARK CLEAN =====
+            markClean();
+            
+            alert('✅ Download voltooid! Jouw website is klaar om te uploaden.');
         })
         .catch(function(err) {
             alert('Er ging iets mis: ' + err.message);

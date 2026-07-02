@@ -86,6 +86,7 @@ function addLayer(type) {
     renderLayers();
     updateLayersList();
     closeLayerSelector();
+    markDirty();  // <-- MARK DIRTY
 }
 
 function deleteLayer(layerId) {
@@ -95,6 +96,7 @@ function deleteLayer(layerId) {
     App.layers[App.currentPage] = layers.filter(l => l.id !== layerId);
     renderLayers();
     updateLayersList();
+    markDirty();  // <-- MARK DIRTY
 }
 
 function duplicateLayer(layerId) {
@@ -110,6 +112,7 @@ function duplicateLayer(layerId) {
     App.layers[App.currentPage].push(newLayer);
     renderLayers();
     updateLayersList();
+    markDirty();  // <-- MARK DIRTY
 }
 
 function moveLayer(layerId, direction) {
@@ -124,6 +127,7 @@ function moveLayer(layerId, direction) {
     }
     renderLayers();
     updateLayersList();
+    markDirty();  // <-- MARK DIRTY
 }
 
 function toggleLayerVisibility(layerId) {
@@ -133,6 +137,7 @@ function toggleLayerVisibility(layerId) {
         layer.visible = !layer.visible;
         renderLayers();
         updateLayersList();
+        markDirty();  // <-- MARK DIRTY
     }
 }
 
@@ -141,6 +146,7 @@ function updateLayerContent(layerId, newContent) {
     const layer = layers.find(l => l.id === layerId);
     if (layer) {
         layer.content = newContent;
+        markDirty();  // <-- MARK DIRTY
     }
 }
 
@@ -230,6 +236,7 @@ function uploadImageForLayer(layerId) {
                 const imgHTML = `<img src="${ev.target.result}" alt="Geüploade afbeelding">`;
                 updateLayerContent(layerId, imgHTML);
                 renderLayers();
+                markDirty();  // <-- MARK DIRTY
             };
             reader.readAsDataURL(file);
         }
@@ -331,6 +338,7 @@ function saveLayerSettings(layerId) {
     closeLayerEditor();
     renderLayers();
     updateLayersList();
+    markDirty();  // <-- MARK DIRTY
 }
 
 function closeLayerEditor() {

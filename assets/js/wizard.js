@@ -9,7 +9,6 @@ function initWizard() {
 
     // Initialize state
     if (!App.navItems) {
-        // Standaard "Home" pagina
         App.navItems = [
             { label: 'Home', filename: 'index', link: 'index.html' }
         ];
@@ -21,7 +20,6 @@ function initWizard() {
         App.layers = {};
     }
 
-    // Zorg dat Home in layers zit
     if (!App.layers['index']) {
         App.layers['index'] = [];
     }
@@ -29,7 +27,6 @@ function initWizard() {
         App.pageBackgrounds['index'] = { color: '#f8fafc', image: null };
     }
     
-    // Zet current page op index
     if (!App.currentPage) {
         App.currentPage = 'index';
     }
@@ -91,7 +88,6 @@ function initWizard() {
         });
     });
 
-    // ===== NAVIGATIE ITEMS =====
     renderNavItems();
 
     document.getElementById('addNavItemBtn').addEventListener('click', function() {
@@ -103,14 +99,12 @@ function initWizard() {
             return;
         }
         
-        // Automatische bestandsnaam genereren als er geen is ingevuld
         if (!filename) {
             filename = label.toLowerCase()
-                .replace(/[^a-z0-9\s-]/g, '')  // verwijder speciale tekens
-                .replace(/\s+/g, '-')           // spaties → streepjes
-                .replace(/-+/g, '-');           // dubbele streepjes → enkel
+                .replace(/[^a-z0-9\s-]/g, '')
+                .replace(/\s+/g, '-')
+                .replace(/-+/g, '-');
         } else {
-            // Maak de ingevulde bestandsnaam veilig
             filename = filename.toLowerCase().replace(/[^a-z0-9-]/g, '');
         }
         
@@ -119,7 +113,6 @@ function initWizard() {
             return;
         }
         
-        // Check of bestandsnaam al bestaat
         if (App.navItems.some(item => item.filename === filename)) {
             alert('Deze bestandsnaam bestaat al!');
             return;
@@ -142,6 +135,7 @@ function initWizard() {
         document.getElementById('newNavItemLink').value = '';
         renderNavItems();
         updatePageSelector();
+        markDirty();  // <-- MARK DIRTY
         
         if (!App.currentPage || !App.navItems.some(item => item.filename === App.currentPage)) {
             App.currentPage = filename;
@@ -155,7 +149,6 @@ function initWizard() {
         }
     });
 
-    // Page selector change
     document.getElementById('pageSelector').addEventListener('change', function() {
         App.currentPage = this.value;
         if (typeof renderLayers === 'function') {
@@ -169,19 +162,18 @@ function initWizard() {
         }
     });
 
-    // Logo preview
     document.getElementById('logoUpload').addEventListener('change', function(e) {
         const file = e.target.files[0];
         if (file) {
             const reader = new FileReader();
             reader.onload = function(ev) {
                 document.getElementById('logoPreview').innerHTML = `<img src="${ev.target.result}" alt="Logo">`;
+                markDirty();  // <-- MARK DIRTY
             };
             reader.readAsDataURL(file);
         }
     });
 
-    // Navigatie background preview
     document.getElementById('navBgImage').addEventListener('change', function(e) {
         const file = e.target.files[0];
         if (file) {
@@ -189,12 +181,12 @@ function initWizard() {
             reader.onload = function(ev) {
                 document.getElementById('navBgPreview').innerHTML = 
                     `<img src="${ev.target.result}" style="max-height:60px; border-radius:8px; border:2px solid #e2e8f0;">`;
+                markDirty();  // <-- MARK DIRTY
             };
             reader.readAsDataURL(file);
         }
     });
 
-    // Pagina background
     document.getElementById('pageBgColor').addEventListener('input', function() {
         const page = App.currentPage;
         if (!page) return;
@@ -206,6 +198,7 @@ function initWizard() {
         if (typeof updatePageCanvasBackground === 'function') {
             updatePageCanvasBackground();
         }
+        markDirty();  // <-- MARK DIRTY
     });
 
     document.getElementById('pageBgImage').addEventListener('change', function(e) {
@@ -225,6 +218,7 @@ function initWizard() {
                 if (typeof updatePageCanvasBackground === 'function') {
                     updatePageCanvasBackground();
                 }
+                markDirty();  // <-- MARK DIRTY
             };
             reader.readAsDataURL(file);
         }
@@ -243,16 +237,15 @@ function initWizard() {
         if (typeof updatePageCanvasBackground === 'function') {
             updatePageCanvasBackground();
         }
+        markDirty();  // <-- MARK DIRTY
     });
 
-    // Download knop
     document.getElementById('downloadBtn').addEventListener('click', function() {
         if (typeof generateAndDownload === 'function') {
             generateAndDownload();
         }
     });
 
-    // Init
     updatePageSelector();
 }
 
@@ -333,7 +326,6 @@ function removeNavItem(index) {
     const item = App.navItems[index];
     if (!item) return;
     
-    // Home (index) mag niet verwijderd worden
     if (item.filename === 'index') {
         alert('De homepage (index) kan niet verwijderd worden!');
         return;
@@ -352,6 +344,7 @@ function removeNavItem(index) {
     
     renderNavItems();
     updatePageSelector();
+    markDirty();  // <-- MARK DIRTY
     if (typeof renderLayers === 'function') {
         renderLayers();
     }

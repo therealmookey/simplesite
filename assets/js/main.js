@@ -7,30 +7,48 @@ const App = {
     siteTitle: 'Mijn Website',
     primaryColor: '#4f8cf7',
     logo: null,
-    pages: ['home', 'over', 'contact'],
-    layers: {
-        home: [],
-        over: [],
-        contact: []
-    },
-    currentStep: 1,
-    currentPage: 'home',
-    layerIdCounter: 0,
-    selectedLayerId: null,
-    
-    // Navigatie instellingen
-    navItems: [
-        { label: 'Home', link: '#home' },
-        { label: 'Over ons', link: '#over' },
-        { label: 'Contact', link: '#contact' }
-    ],
+    navItems: [],
     navStyle: 'horizontal',
     navBgColor: '#ffffff',
     navBgImage: null,
+    pageBackgrounds: {},
+    layers: {},
+    currentStep: 1,
+    currentPage: 'index',
     
-    // Pagina achtergronden
-    pageBackgrounds: {}
+    // ===== DIRTY TRACKING =====
+    isDirty: true  // Start als dirty zodat eerste export getoond wordt
 };
+
+// ===== DIRTY FUNCTIES =====
+function markDirty() {
+    App.isDirty = true;
+    updateStatusDisplay();
+}
+
+function markClean() {
+    App.isDirty = false;
+    updateStatusDisplay();
+}
+
+function updateStatusDisplay() {
+    const statusDot = document.getElementById('statusDot');
+    const statusText = document.getElementById('statusText');
+    
+    if (!statusDot || !statusText) return;
+    
+    if (App.isDirty) {
+        statusDot.className = 'status-dot dirty';
+        statusDot.style.backgroundColor = '#fc8181';
+        statusText.textContent = 'Wijzigingen niet opgeslagen';
+        statusText.style.color = '#e53e3e';
+    } else {
+        statusDot.className = 'status-dot clean';
+        statusDot.style.backgroundColor = '#38a169';
+        statusText.textContent = 'Alles is up-to-date';
+        statusText.style.color = '#38a169';
+    }
+}
 
 // ===== INCLUDES LADEN =====
 async function loadIncludes() {
@@ -41,7 +59,6 @@ async function loadIncludes() {
         const footerRes = await fetch('assets/includes/footer.html');
         document.getElementById('footer-placeholder').innerHTML = await footerRes.text();
     } catch (error) {
-        // Fallback
         document.getElementById('header-placeholder').innerHTML = `
             <header class="site-header">
                 <a href="#" class="logo">Simple<span>Site</span></a>
@@ -71,5 +88,10 @@ document.addEventListener('DOMContentLoaded', function() {
     initWizard();
     initLayers();
     initPayment();
-    initNavItems();
+    updateStatusDisplay();
 });
+
+// Expose functions
+window.markDirty = markDirty;
+window.markClean = markClean;
+window.updateStatusDisplay = updateStatusDisplay;

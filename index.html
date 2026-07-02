@@ -42,7 +42,19 @@
 
                 <hr>
 
-                <!-- Lagen panel (zichtbaar in stap 3) -->
+                <!-- STATUS INDICATOR -->
+                <div id="statusContainer" style="padding:10px 0; border-bottom:1px solid #e2e8f0; margin-bottom:10px;">
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <span id="statusDot" class="status-dot" style="width:12px; height:12px; border-radius:50%; display:inline-block; background-color:#fc8181;"></span>
+                        <span id="statusText" style="font-size:13px; font-weight:500; color:#e53e3e;">Wijzigingen niet opgeslagen</span>
+                    </div>
+                    <div style="font-size:11px; color:#a0aec0; margin-top:4px; padding-left:22px;">
+                        <i class="fas fa-info-circle"></i> 
+                        Exporteer/download om op te slaan
+                    </div>
+                </div>
+
+                <!-- Lagen panel -->
                 <div id="layersPanel" style="display:none;">
                     <h3><i class="fas fa-layer-group"></i> Lagen</h3>
                     <div id="layersList">
@@ -70,18 +82,18 @@
                     
                     <div class="form-group">
                         <label>Bedrijfsnaam / Website titel</label>
-                        <input type="text" id="siteTitle" placeholder="Mijn bedrijf" class="form-control" value="Mijn Website">
+                        <input type="text" id="siteTitle" placeholder="Mijn bedrijf" class="form-control" value="Mijn Website" onchange="markDirty()" oninput="markDirty()">
                     </div>
                     <div class="form-group">
                         <label>Kleur thema</label>
                         <div class="color-picker">
-                            <input type="color" id="primaryColor" value="#4f8cf7">
+                            <input type="color" id="primaryColor" value="#4f8cf7" onchange="markDirty()" oninput="markDirty()">
                             <span>Primaire kleur</span>
                         </div>
                     </div>
                     <div class="form-group">
                         <label>Logo (optioneel)</label>
-                        <input type="file" id="logoUpload" accept="image/*" class="form-control">
+                        <input type="file" id="logoUpload" accept="image/*" class="form-control" onchange="markDirty()">
                         <div id="logoPreview"></div>
                     </div>
                     
@@ -90,56 +102,54 @@
                     </div>
                 </div>
 
-                <!-- Stap 2: Navigatie (alleen dit deel wijzigt) -->
-<div class="wizard-step-content" id="step2" style="display:none;">
-    <h2><i class="fas fa-bars"></i> Navigatie menu</h2>
-    <p class="step-description">Voeg pagina's toe aan het navigatiemenu. Deze worden aparte HTML pagina's.</p>
-    
-    <div class="form-group">
-        <label>Navigatie stijl</label>
-        <select id="navStyle" class="form-control">
-            <option value="horizontal">Horizontaal (standaard)</option>
-            <option value="vertical">Verticaal (zijkant)</option>
-            <option value="hamburger">Hamburger menu (mobiel)</option>
-        </select>
-    </div>
-    
-    <div class="form-group">
-        <label>Navigatie items (pagina's)</label>
-        <div id="navItemsContainer">
-            <!-- Wordt gevuld met standaard Home -->
-        </div>
-        <div style="display:flex; gap:10px; margin-top:10px; flex-wrap:wrap;">
-            <input type="text" id="newNavItemLabel" placeholder="Bijv. Over ons" class="form-control" style="flex:1; min-width:150px;">
-            <input type="text" id="newNavItemLink" placeholder="Bestandsnaam (optioneel)" class="form-control" style="flex:1; min-width:150px;">
-            <button class="btn btn-primary" id="addNavItemBtn">
-                <i class="fas fa-plus"></i> Toevoegen
-            </button>
-        </div>
-        <p style="font-size:12px; color:#a0aec0; margin-top:6px;">
-            <i class="fas fa-info-circle"></i> 
-            Laat bestandsnaam leeg voor automatische naam (bijv. "over-ons")
-        </p>
-    </div>
+                <!-- Stap 2: Navigatie -->
+                <div class="wizard-step-content" id="step2" style="display:none;">
+                    <h2><i class="fas fa-bars"></i> Navigatie menu</h2>
+                    <p class="step-description">Voeg pagina's toe aan het navigatiemenu. Deze worden aparte HTML pagina's.</p>
+                    
+                    <div class="form-group">
+                        <label>Navigatie stijl</label>
+                        <select id="navStyle" class="form-control" onchange="markDirty()">
+                            <option value="horizontal">Horizontaal (standaard)</option>
+                            <option value="vertical">Verticaal (zijkant)</option>
+                            <option value="hamburger">Hamburger menu (mobiel)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Navigatie items (pagina's)</label>
+                        <div id="navItemsContainer"></div>
+                        <div style="display:flex; gap:10px; margin-top:10px; flex-wrap:wrap;">
+                            <input type="text" id="newNavItemLabel" placeholder="Bijv. Over ons" class="form-control" style="flex:1; min-width:150px;">
+                            <input type="text" id="newNavItemLink" placeholder="Bestandsnaam (optioneel)" class="form-control" style="flex:1; min-width:150px;">
+                            <button class="btn btn-primary" id="addNavItemBtn">
+                                <i class="fas fa-plus"></i> Toevoegen
+                            </button>
+                        </div>
+                        <p style="font-size:12px; color:#a0aec0; margin-top:6px;">
+                            <i class="fas fa-info-circle"></i> 
+                            Laat bestandsnaam leeg voor automatische naam
+                        </p>
+                    </div>
 
-    <div class="form-group">
-        <label>Navigatie achtergrond</label>
-        <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
-            <input type="color" id="navBgColor" value="#ffffff" class="form-control" style="width:60px; padding:2px; height:40px;">
-            <span>Kleur</span>
-            <input type="file" id="navBgImage" accept="image/*" class="form-control" style="flex:1; padding:8px;">
-            <span style="font-size:13px; color:#a0aec0;">of afbeelding</span>
-        </div>
-        <div id="navBgPreview" style="margin-top:8px;"></div>
-    </div>
-    
-    <div style="margin-top:20px; display:flex; gap:10px; justify-content:space-between;">
-        <button class="btn btn-outline prev-step">← Vorige</button>
-        <button class="btn btn-primary next-step">Volgende stap →</button>
-    </div>
-</div>
+                    <div class="form-group">
+                        <label>Navigatie achtergrond</label>
+                        <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+                            <input type="color" id="navBgColor" value="#ffffff" class="form-control" style="width:60px; padding:2px; height:40px;" onchange="markDirty()" oninput="markDirty()">
+                            <span>Kleur</span>
+                            <input type="file" id="navBgImage" accept="image/*" class="form-control" style="flex:1; padding:8px;" onchange="markDirty()">
+                            <span style="font-size:13px; color:#a0aec0;">of afbeelding</span>
+                        </div>
+                        <div id="navBgPreview" style="margin-top:8px;"></div>
+                    </div>
+                    
+                    <div style="margin-top:20px; display:flex; gap:10px; justify-content:space-between;">
+                        <button class="btn btn-outline prev-step">← Vorige</button>
+                        <button class="btn btn-primary next-step">Volgende stap →</button>
+                    </div>
+                </div>
 
-                <!-- Stap 3: Lagen (TERUG NAAR DE OUDE STIJL) -->
+                <!-- Stap 3: Lagen -->
                 <div class="wizard-step-content" id="step3" style="display:none;">
                     <h2><i class="fas fa-layer-group"></i> Bouw jouw pagina's</h2>
                     <p class="step-description">Selecteer een pagina en voeg lagen toe.</p>
@@ -157,9 +167,9 @@
                     <div class="form-group">
                         <label>Pagina achtergrond</label>
                         <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
-                            <input type="color" id="pageBgColor" value="#f8fafc" class="form-control" style="width:60px; padding:2px; height:40px;">
+                            <input type="color" id="pageBgColor" value="#f8fafc" class="form-control" style="width:60px; padding:2px; height:40px;" onchange="markDirty()" oninput="markDirty()">
                             <span>Kleur</span>
-                            <input type="file" id="pageBgImage" accept="image/*" class="form-control" style="flex:1; padding:8px;">
+                            <input type="file" id="pageBgImage" accept="image/*" class="form-control" style="flex:1; padding:8px;" onchange="markDirty()">
                             <span style="font-size:13px; color:#a0aec0;">of afbeelding</span>
                             <button class="btn btn-sm btn-outline" id="clearPageBg">Wis</button>
                         </div>
