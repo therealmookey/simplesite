@@ -299,93 +299,93 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 50);
     };
 
- function renderPreview() {
-    const settings = getSettings();
-    const pageId = document.getElementById('page-select').value;
-    const pages = settings.pages || {};
-    const page = pages[pageId] || { title: 'Welkom bij mijn website', content: 'Dit is de inhoud van mijn website.' };
-    
-    // Haal actuele waarden op (voor real-time updates)
-    const currentTitle = document.getElementById('page-title').value || page.title;
-    const currentContent = document.getElementById('page-content').value || page.content;
-    const siteTitle = document.getElementById('site-title').value || 'SimpleSite';
-    const siteDesc = document.getElementById('site-description').value || '';
-    
-    // Kleuren
-    const primaryColor = settings.primaryColor || '#2563eb';
-    const bgColor = settings.bgColor || '#ffffff';
-    const textColor = settings.textColor || '#1a1a1a';
-    
-    // ========================================
-    // NAVIGATIE - Dynamisch op basis van pagina's
-    // ========================================
-    const pageNames = settings.pageNames || { home: 'Home' };
-    let navLinks = '';
-    
-    // Home is altijd eerste
-    navLinks += `<span style="color:${textColor};">Home</span>`;
-    
-    // Voeg andere pagina's toe
-    for (const [id, name] of Object.entries(pageNames)) {
-        if (id !== 'home') {
-            // Markeer de huidige pagina in de navigatie
-            const isActive = (id === pageId);
-            navLinks += `<span style="color:${isActive ? primaryColor : textColor}; ${isActive ? 'font-weight:600;' : ''}">${name}</span>`;
+    function renderPreview() {
+        const settings = getSettings();
+        const pageId = document.getElementById('page-select').value;
+        const pages = settings.pages || {};
+        const page = pages[pageId] || { title: 'Welkom bij mijn website', content: 'Dit is de inhoud van mijn website.' };
+        
+        // Haal actuele waarden op (voor real-time updates)
+        const currentTitle = document.getElementById('page-title').value || page.title;
+        const currentContent = document.getElementById('page-content').value || page.content;
+        const siteTitle = document.getElementById('site-title').value || 'SimpleSite';
+        const siteDesc = document.getElementById('site-description').value || '';
+        
+        // Kleuren
+        const primaryColor = settings.primaryColor || '#2563eb';
+        const bgColor = settings.bgColor || '#ffffff';
+        const textColor = settings.textColor || '#1a1a1a';
+        
+        // ========================================
+        // NAVIGATIE - Dynamisch op basis van pagina's
+        // ========================================
+        const pageNames = settings.pageNames || { home: 'Home' };
+        let navLinks = '';
+        
+        // Home is altijd eerste
+        navLinks += `<span style="color:${textColor};">Home</span>`;
+        
+        // Voeg andere pagina's toe
+        for (const [id, name] of Object.entries(pageNames)) {
+            if (id !== 'home') {
+                // Markeer de huidige pagina in de navigatie
+                const isActive = (id === pageId);
+                navLinks += `<span style="color:${isActive ? primaryColor : textColor}; ${isActive ? 'font-weight:600;' : ''}">${name}</span>`;
+            }
+        }
+        
+        // ========================================
+        // PAGINA CONTENT
+        // ========================================
+        // Als de pagina een eigen titel heeft in de pages data, gebruik die
+        const pageTitle = page.title || currentTitle;
+        const pageContent = page.content || currentContent;
+        
+        // Bouw de preview HTML
+        const previewHTML = `
+            <div class="preview-header" style="background:${bgColor};border-bottom:1px solid #f0f0f0;padding:1rem 2rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.5rem;">
+                <div style="font-size:1.4rem;font-weight:700;">
+                    <span style="color:${textColor};">${siteTitle}</span>
+                </div>
+                <div style="display:flex;gap:1.5rem;font-size:0.95rem;flex-wrap:wrap;">
+                    ${navLinks}
+                </div>
+            </div>
+            <div class="preview-hero" style="text-align:center;padding:4rem 2rem;background:${bgColor};min-height:200px;">
+                <h1 style="font-size:2.5rem;color:${textColor};margin-bottom:1rem;">${pageTitle}</h1>
+                <p style="color:#6b7280;max-width:500px;margin:0 auto;font-size:1.1rem;">${pageContent}</p>
+                ${siteDesc ? `<p style="color:#6b7280;max-width:500px;margin:1rem auto 0;font-size:0.95rem;opacity:0.7;">${siteDesc}</p>` : ''}
+                <div style="margin-top:2rem;">
+                    <a href="#" style="display:inline-block;background:${primaryColor};color:#fff;padding:0.7rem 2rem;border-radius:6px;text-decoration:none;font-weight:600;">Begin nu</a>
+                </div>
+            </div>
+            <div class="preview-footer" style="background:#fafafa;border-top:1px solid #f0f0f0;padding:2rem;text-align:center;color:#6b7280;font-size:0.9rem;">
+                © 2026 SimpleSite — Simpel. Snel. Professioneel.
+            </div>
+        `;
+        
+        // Update main preview
+        const previewSite = document.getElementById('preview-site');
+        if (previewSite) {
+            previewSite.innerHTML = previewHTML;
+        }
+        
+        // Update duplicate if exists
+        const duplicate = document.getElementById('preview-frame-duplicate');
+        if (duplicate) {
+            const dupContent = duplicate.querySelector('.preview-content');
+            if (dupContent) {
+                dupContent.innerHTML = previewHTML;
+            }
+        }
+        
+        // Update timestamp
+        const timestamp = document.getElementById('preview-timestamp');
+        if (timestamp) {
+            const now = new Date();
+            timestamp.textContent = `Laatste update: ${now.toLocaleTimeString()}`;
         }
     }
-    
-    // ========================================
-    // PAGINA CONTENT
-    // ========================================
-    // Als de pagina een eigen titel heeft in de pages data, gebruik die
-    const pageTitle = page.title || currentTitle;
-    const pageContent = page.content || currentContent;
-    
-    // Bouw de preview HTML
-    const previewHTML = `
-        <div class="preview-header" style="background:${bgColor};border-bottom:1px solid #f0f0f0;padding:1rem 2rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.5rem;">
-            <div style="font-size:1.4rem;font-weight:700;">
-                <span style="color:${textColor};">${siteTitle}</span>
-            </div>
-            <div style="display:flex;gap:1.5rem;font-size:0.95rem;flex-wrap:wrap;">
-                ${navLinks}
-            </div>
-        </div>
-        <div class="preview-hero" style="text-align:center;padding:4rem 2rem;background:${bgColor};min-height:200px;">
-            <h1 style="font-size:2.5rem;color:${textColor};margin-bottom:1rem;">${pageTitle}</h1>
-            <p style="color:#6b7280;max-width:500px;margin:0 auto;font-size:1.1rem;">${pageContent}</p>
-            ${siteDesc ? `<p style="color:#6b7280;max-width:500px;margin:1rem auto 0;font-size:0.95rem;opacity:0.7;">${siteDesc}</p>` : ''}
-            <div style="margin-top:2rem;">
-                <a href="#" style="display:inline-block;background:${primaryColor};color:#fff;padding:0.7rem 2rem;border-radius:6px;text-decoration:none;font-weight:600;">Begin nu</a>
-            </div>
-        </div>
-        <div class="preview-footer" style="background:#fafafa;border-top:1px solid #f0f0f0;padding:2rem;text-align:center;color:#6b7280;font-size:0.9rem;">
-            © 2026 SimpleSite — Simpel. Snel. Professioneel.
-        </div>
-    `;
-    
-    // Update main preview
-    const previewSite = document.getElementById('preview-site');
-    if (previewSite) {
-        previewSite.innerHTML = previewHTML;
-    }
-    
-    // Update duplicate if exists
-    const duplicate = document.getElementById('preview-frame-duplicate');
-    if (duplicate) {
-        const dupContent = duplicate.querySelector('.preview-content');
-        if (dupContent) {
-            dupContent.innerHTML = previewHTML;
-        }
-    }
-    
-    // Update timestamp
-    const timestamp = document.getElementById('preview-timestamp');
-    if (timestamp) {
-        const now = new Date();
-        timestamp.textContent = `Laatste update: ${now.toLocaleTimeString()}`;
-    }
-}
 
     // ========================================
     // 13. SETTINGS FUNCTIES
@@ -416,86 +416,89 @@ document.addEventListener('DOMContentLoaded', function() {
     // ========================================
     // 15. INIT
     // ========================================
-   function init() {
-    // Load settings
-    const settings = getSettings();
-    
-    // Fill fields
-    if (settings.title) {
-        document.getElementById('site-title').value = settings.title;
-    }
-    if (settings.description) {
-        document.getElementById('site-description').value = settings.description;
-    }
-    if (settings.primaryColor) {
-        document.getElementById('primary-color').value = settings.primaryColor;
-        document.getElementById('primary-color-hex').value = settings.primaryColor;
-    }
-    if (settings.bgColor) {
-        document.getElementById('bg-color').value = settings.bgColor;
-        document.getElementById('bg-color-hex').value = settings.bgColor;
-    }
-    if (settings.textColor) {
-        document.getElementById('text-color').value = settings.textColor;
-        document.getElementById('text-color-hex').value = settings.textColor;
-    }
-    
-    // Load pages
-    const pageNames = settings.pageNames || { home: 'Home' };
-    const select = document.getElementById('page-select');
-    const list = document.getElementById('page-list');
-    
-    // Clear list (keep home)
-    list.innerHTML = '';
-    select.innerHTML = '';
-    
-    // Add home
-    const homeItem = document.createElement('div');
-    homeItem.className = 'page-item';
-    homeItem.dataset.page = 'home';
-    homeItem.innerHTML = `
-        <span>🏠 Home</span>
-        <span style="color:#6b7280;font-size:0.85rem;">index.html</span>
-    `;
-    list.appendChild(homeItem);
-    
-    const homeOption = document.createElement('option');
-    homeOption.value = 'home';
-    homeOption.textContent = 'Home';
-    select.appendChild(homeOption);
-    
-    // Add other pages
-    const pages = settings.pages || {};
-    for (const [pageId, name] of Object.entries(pageNames)) {
-        if (pageId !== 'home') {
-            const item = document.createElement('div');
-            item.className = 'page-item';
-            item.dataset.page = pageId;
-            const pageName = name;
-            item.innerHTML = `
-                <span>📄 ${pageName}</span>
-                <span style="color:#6b7280;font-size:0.85rem;">${pageId}.html</span>
-                <button class="btn-delete-page" data-page="${pageId}" onclick="deletePage('${pageId}', '${pageName}')">✕</button>
-            `;
-            list.appendChild(item);
-            
-            const option = document.createElement('option');
-            option.value = pageId;
-            option.textContent = pageName;
-            select.appendChild(option);
+    function init() {
+        // Load settings
+        const settings = getSettings();
+        
+        // Fill fields
+        if (settings.title) {
+            document.getElementById('site-title').value = settings.title;
         }
+        if (settings.description) {
+            document.getElementById('site-description').value = settings.description;
+        }
+        if (settings.primaryColor) {
+            document.getElementById('primary-color').value = settings.primaryColor;
+            document.getElementById('primary-color-hex').value = settings.primaryColor;
+        }
+        if (settings.bgColor) {
+            document.getElementById('bg-color').value = settings.bgColor;
+            document.getElementById('bg-color-hex').value = settings.bgColor;
+        }
+        if (settings.textColor) {
+            document.getElementById('text-color').value = settings.textColor;
+            document.getElementById('text-color-hex').value = settings.textColor;
+        }
+        
+        // Load pages
+        const pageNames = settings.pageNames || { home: 'Home' };
+        const select = document.getElementById('page-select');
+        const list = document.getElementById('page-list');
+        
+        // Clear list (keep home)
+        list.innerHTML = '';
+        select.innerHTML = '';
+        
+        // Add home
+        const homeItem = document.createElement('div');
+        homeItem.className = 'page-item';
+        homeItem.dataset.page = 'home';
+        homeItem.innerHTML = `
+            <span>🏠 Home</span>
+            <span style="color:#6b7280;font-size:0.85rem;">index.html</span>
+        `;
+        list.appendChild(homeItem);
+        
+        const homeOption = document.createElement('option');
+        homeOption.value = 'home';
+        homeOption.textContent = 'Home';
+        select.appendChild(homeOption);
+        
+        // Add other pages
+        const pages = settings.pages || {};
+        for (const [pageId, name] of Object.entries(pageNames)) {
+            if (pageId !== 'home') {
+                const item = document.createElement('div');
+                item.className = 'page-item';
+                item.dataset.page = pageId;
+                const pageName = name;
+                item.innerHTML = `
+                    <span>📄 ${pageName}</span>
+                    <span style="color:#6b7280;font-size:0.85rem;">${pageId}.html</span>
+                    <button class="btn-delete-page" data-page="${pageId}" onclick="deletePage('${pageId}', '${pageName}')">✕</button>
+                `;
+                list.appendChild(item);
+                
+                const option = document.createElement('option');
+                option.value = pageId;
+                option.textContent = pageName;
+                select.appendChild(option);
+            }
+        }
+        
+        // Load content for home
+        loadPageContent('home');
+        
+        // Initial preview
+        setTimeout(updatePreview, 200);
+        
+        console.log('🚀 SimpleSite WYSIWYG Builder is klaar!');
+        console.log('📄 Pagina\'s in navigatie:', Object.values(pageNames).join(', '));
+        console.log('💡 Alles wat je verandert, zie je direct in de preview.');
     }
-    
-    // Load content for home
-    loadPageContent('home');
-    
-    // Initial preview
-    setTimeout(updatePreview, 200);
-    
-    console.log('🚀 SimpleSite WYSIWYG Builder is klaar!');
-    console.log('📄 Pagina\'s in navigatie:', Object.values(pageNames).join(', '));
-    console.log('💡 Alles wat je verandert, zie je direct in de preview.');
-}
+
+    init();
+});
 
 // ========================================
 // 16. GLOBALE FUNCTIES VOOR ONCLICK
