@@ -5,25 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SimpleSite - Website Builder</title>
     
-    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <!-- JSZip -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     
-    <!-- Eigen CSS -->
     <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
-    <!-- HEADER (standaard navigatie) -->
     <div id="header-placeholder"></div>
 
-    <!-- MAIN CONTENT -->
     <main class="main-content">
         <div class="container">
-            <!-- SIDEBAR -->
             <aside class="sidebar">
-                <!-- Stappen indicator -->
                 <div class="wizard-steps">
                     <div class="step active" data-step="1">
                         <span class="step-number">1</span>
@@ -37,16 +30,11 @@
                     </div>
                     <div class="step" data-step="3">
                         <span class="step-number">3</span>
-                        <span class="step-label">Pagina's</span>
+                        <span class="step-label">Bouwer</span>
                         <span class="step-status"></span>
                     </div>
                     <div class="step" data-step="4">
                         <span class="step-number">4</span>
-                        <span class="step-label">Lagen</span>
-                        <span class="step-status"></span>
-                    </div>
-                    <div class="step" data-step="5">
-                        <span class="step-number">5</span>
                         <span class="step-label">Preview</span>
                         <span class="step-status"></span>
                     </div>
@@ -54,24 +42,55 @@
 
                 <hr>
 
-                <!-- Lagen panel (zichtbaar in stap 4) -->
-                <div id="layersPanel" style="display:none;">
-                    <h3><i class="fas fa-layer-group"></i> Lagen</h3>
-                    <div id="layersList"></div>
-                    <button class="btn btn-sm btn-primary" id="addLayerBtn" style="width:100%; margin-top:10px;">
-                        <i class="fas fa-plus"></i> Laag toevoegen
-                    </button>
+                <!-- Blokken panel (zichtbaar in stap 3) -->
+                <div id="blocksPanel" style="display:none;">
+                    <h3><i class="fas fa-cubes"></i> Blokken</h3>
+                    <div class="block-toolbar">
+                        <button class="block-btn" data-type="section">
+                            <i class="fas fa-square"></i> Sectie
+                        </button>
+                        <button class="block-btn" data-type="columns">
+                            <i class="fas fa-columns"></i> Kolommen
+                        </button>
+                        <button class="block-btn" data-type="heading">
+                            <i class="fas fa-heading"></i> Koptekst
+                        </button>
+                        <button class="block-btn" data-type="text">
+                            <i class="fas fa-paragraph"></i> Tekst
+                        </button>
+                        <button class="block-btn" data-type="image">
+                            <i class="fas fa-image"></i> Afbeelding
+                        </button>
+                        <button class="block-btn" data-type="button">
+                            <i class="fas fa-link"></i> Knop
+                        </button>
+                        <button class="block-btn" data-type="divider">
+                            <i class="fas fa-minus"></i> Scheiding
+                        </button>
+                        <button class="block-btn" data-type="spacer">
+                            <i class="fas fa-arrows-v"></i> Ruimte
+                        </button>
+                        <button class="block-btn" data-type="hero">
+                            <i class="fas fa-image"></i> Hero
+                        </button>
+                        <button class="block-btn" data-type="card">
+                            <i class="fas fa-square"></i> Kaart
+                        </button>
+                    </div>
+
+                    <hr>
+
+                    <h3><i class="fas fa-layer-group"></i> Structuur</h3>
+                    <div id="structureTree"></div>
                 </div>
 
                 <hr>
 
-                <!-- Actie knoppen -->
                 <button class="btn btn-success btn-block" id="purchaseBtn">
                     <i class="fas fa-shopping-cart"></i> Website Kopen (€49,-)
                 </button>
             </aside>
 
-            <!-- CANVAS -->
             <section class="canvas-container">
                 <!-- Stap 1: Algemene gegevens -->
                 <div class="wizard-step-content" id="step1">
@@ -100,10 +119,10 @@
                     </div>
                 </div>
 
-                <!-- Stap 2: Navigatie -->
+                <!-- Stap 2: Navigatie (pagina's toevoegen) -->
                 <div class="wizard-step-content" id="step2" style="display:none;">
                     <h2><i class="fas fa-bars"></i> Navigatie menu</h2>
-                    <p class="step-description">Stel het navigatiemenu in voor jouw website.</p>
+                    <p class="step-description">Voeg pagina's toe aan het navigatiemenu. Deze pagina's kun je daarna bouwen.</p>
                     
                     <div class="form-group">
                         <label>Navigatie stijl</label>
@@ -115,22 +134,30 @@
                     </div>
                     
                     <div class="form-group">
-                        <label>Navigatie items</label>
+                        <label>Navigatie items (pagina's)</label>
                         <div id="navItemsContainer">
-                            <!-- Standaard navigatie items worden hier geladen -->
+                            <!-- Wordt gevuld met standaard pagina's -->
                         </div>
-                        <button class="btn btn-sm btn-outline" id="addNavItem" style="margin-top:8px;">
-                            <i class="fas fa-plus"></i> Menu item toevoegen
-                        </button>
+                        <div style="display:flex; gap:10px; margin-top:10px; flex-wrap:wrap;">
+                            <input type="text" id="newNavItemLabel" placeholder="Bijv. Diensten" class="form-control" style="flex:1; min-width:150px;">
+                            <input type="text" id="newNavItemLink" placeholder="Link (bijv. #diensten)" class="form-control" style="flex:1; min-width:150px;" value="#">
+                            <button class="btn btn-primary" id="addNavItemBtn">
+                                <i class="fas fa-plus"></i> Toevoegen
+                            </button>
+                        </div>
+                        <p style="font-size:12px; color:#a0aec0; margin-top:6px;">
+                            <i class="fas fa-info-circle"></i> 
+                            Tip: Een link begint met # gevolgd door de paginanaam, bijv. #home
+                        </p>
                     </div>
 
                     <div class="form-group">
                         <label>Navigatie achtergrond</label>
-                        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                        <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
                             <input type="color" id="navBgColor" value="#ffffff" class="form-control" style="width:60px; padding:2px; height:40px;">
-                            <span style="display:flex; align-items:center;">Kleur</span>
+                            <span>Kleur</span>
                             <input type="file" id="navBgImage" accept="image/*" class="form-control" style="flex:1; padding:8px;">
-                            <span style="display:flex; align-items:center; font-size:13px; color:#a0aec0;">of afbeelding</span>
+                            <span style="font-size:13px; color:#a0aec0;">of afbeelding</span>
                         </div>
                         <div id="navBgPreview" style="margin-top:8px;"></div>
                     </div>
@@ -141,76 +168,44 @@
                     </div>
                 </div>
 
-                <!-- Stap 3: Pagina's -->
+                <!-- Stap 3: Bouwer (alleen navigatie pagina's) -->
                 <div class="wizard-step-content" id="step3" style="display:none;">
-                    <h2><i class="fas fa-files"></i> Kies jouw pagina's</h2>
-                    <p class="step-description">Selecteer welke pagina's jouw website moet hebben.</p>
+                    <h2><i class="fas fa-cubes"></i> Bouw jouw pagina's</h2>
+                    <p class="step-description">Selecteer een pagina uit de navigatie en bouw hem met blokken.</p>
                     
-                    <div class="page-list">
-                        <label class="page-option">
-                            <input type="checkbox" value="home" checked> Home
-                        </label>
-                        <label class="page-option">
-                            <input type="checkbox" value="over" checked> Over ons
-                        </label>
-                        <label class="page-option">
-                            <input type="checkbox" value="diensten"> Diensten
-                        </label>
-                        <label class="page-option">
-                            <input type="checkbox" value="contact" checked> Contact
-                        </label>
-                        <label class="page-option">
-                            <input type="checkbox" value="blog"> Blog
-                        </label>
-                        <label class="page-option">
-                            <input type="checkbox" value="portfolio"> Portfolio
-                        </label>
-                        <label class="page-option">
-                            <input type="checkbox" value="team"> Team
-                        </label>
-                        <label class="page-option">
-                            <input type="checkbox" value="faq"> FAQ
-                        </label>
-                    </div>
-
-                    <div class="form-group" style="margin-top:20px;">
-                        <label>Eigen pagina toevoegen</label>
-                        <div style="display:flex; gap:10px;">
-                            <input type="text" id="customPageName" placeholder="Pagina naam" class="form-control">
-                            <button class="btn btn-primary" id="addCustomPage"><i class="fas fa-plus"></i></button>
+                    <div class="form-group">
+                        <label>Selecteer pagina om te bouwen:</label>
+                        <select id="pageSelector" class="form-control"></select>
+                        <div style="display:flex; gap:10px; margin-top:8px; flex-wrap:wrap;">
+                            <button class="btn btn-sm btn-outline" id="addBlockToPage">
+                                <i class="fas fa-plus"></i> Blok toevoegen
+                            </button>
+                            <button class="btn btn-sm btn-outline" id="refreshPageSelector">
+                                <i class="fas fa-sync"></i> Vernieuw
+                            </button>
                         </div>
                     </div>
-                    
-                    <div style="margin-top:20px; display:flex; gap:10px; justify-content:space-between;">
-                        <button class="btn btn-outline prev-step">← Vorige</button>
-                        <button class="btn btn-primary next-step">Volgende stap →</button>
-                    </div>
-                </div>
 
-                <!-- Stap 4: Lagen -->
-                <div class="wizard-step-content" id="step4" style="display:none;">
-                    <h2><i class="fas fa-layer-group"></i> Bouw jouw pagina's</h2>
-                    <p class="step-description">Voeg lagen toe aan elke pagina en bewerk de content.</p>
-                    
-                    <div class="page-selector">
-                        <label>Selecteer pagina:</label>
-                        <select id="pageSelector" class="form-control"></select>
-                    </div>
-
-                    <div class="form-group" style="margin-top:10px;">
+                    <div class="form-group">
                         <label>Pagina achtergrond</label>
                         <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
                             <input type="color" id="pageBgColor" value="#f8fafc" class="form-control" style="width:60px; padding:2px; height:40px;">
                             <span>Kleur</span>
                             <input type="file" id="pageBgImage" accept="image/*" class="form-control" style="flex:1; padding:8px;">
                             <span style="font-size:13px; color:#a0aec0;">of afbeelding</span>
-                            <button class="btn btn-sm btn-outline" id="clearPageBg">Wis achtergrond</button>
+                            <button class="btn btn-sm btn-outline" id="clearPageBg">Wis</button>
                         </div>
                         <div id="pageBgPreview" style="margin-top:8px;"></div>
                     </div>
 
-                    <div id="pageCanvas" class="page-canvas" style="margin-top:10px;">
-                        <div id="layersContainer"></div>
+                    <div id="pageCanvas" class="page-canvas">
+                        <div id="blocksContainer">
+                            <div class="empty-state" id="emptyBlocksState">
+                                <i class="fas fa-cubes"></i>
+                                <h3>Geen blokken</h3>
+                                <p>Klik op "Blok toevoegen" of kies een blok uit de sidebar</p>
+                            </div>
+                        </div>
                     </div>
 
                     <div style="margin-top:20px; display:flex; gap:10px; justify-content:space-between; flex-wrap:wrap;">
@@ -219,14 +214,12 @@
                     </div>
                 </div>
 
-                <!-- Stap 5: Preview -->
-                <div class="wizard-step-content" id="step5" style="display:none;">
+                <!-- Stap 4: Preview -->
+                <div class="wizard-step-content" id="step4" style="display:none;">
                     <h2><i class="fas fa-eye"></i> Preview & Download</h2>
                     <p class="step-description">Bekijk een voorbeeld van jouw complete website.</p>
                     
-                    <div id="websitePreview" class="website-preview">
-                        <!-- Preview wordt hier geladen -->
-                    </div>
+                    <div id="websitePreview" class="website-preview"></div>
                     
                     <div style="margin-top:20px; display:flex; gap:10px; justify-content:space-between; flex-wrap:wrap;">
                         <button class="btn btn-outline prev-step">← Vorige</button>
@@ -239,10 +232,9 @@
         </div>
     </main>
 
-    <!-- FOOTER -->
     <div id="footer-placeholder"></div>
 
-    <!-- BETALINGS MODAL -->
+    <!-- MODALS -->
     <div id="paymentModal" class="modal">
         <div class="modal-content">
             <span class="close-modal">&times;</span>
@@ -253,10 +245,9 @@
                 <p><strong>Wat krijg je:</strong></p>
                 <ul>
                     <li>✅ Complete HTML/CSS/JS bestanden</li>
-                    <li>✅ Alle pagina's en lagen</li>
+                    <li>✅ Alle pagina's en blokken</li>
+                    <li>✅ Kolommen & layouts</li>
                     <li>✅ Responsive design</li>
-                    <li>✅ Navigatie menu</li>
-                    <li>✅ Achtergrondafbeeldingen</li>
                     <li>✅ Geen verborgen kosten</li>
                 </ul>
             </div>
@@ -269,10 +260,22 @@
         </div>
     </div>
 
-    <!-- Eigen JavaScript -->
+    <!-- Block Editor Modal -->
+    <div id="blockEditorModal" class="modal">
+        <div class="modal-content modal-large">
+            <span class="close-modal" id="closeBlockEditor">&times;</span>
+            <h2 id="blockEditorTitle"><i class="fas fa-edit"></i> Bewerk blok</h2>
+            <div id="blockEditorContent"></div>
+            <div style="margin-top:20px; display:flex; gap:10px; justify-content:flex-end;">
+                <button class="btn btn-outline" id="closeBlockEditorBtn">Sluiten</button>
+                <button class="btn btn-primary" id="saveBlockEditorBtn"><i class="fas fa-save"></i> Opslaan</button>
+            </div>
+        </div>
+    </div>
+
     <script src="assets/js/main.js"></script>
     <script src="assets/js/wizard.js"></script>
-    <script src="assets/js/layers.js"></script>
+    <script src="assets/js/blocks.js"></script>
     <script src="assets/js/export.js"></script>
     <script src="assets/js/payment.js"></script>
 </body>
