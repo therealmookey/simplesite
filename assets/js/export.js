@@ -6,13 +6,22 @@ function generatePreview() {
     const container = document.getElementById('websitePreview');
     if (!container) return;
     
+    if (!App.navItems || App.navItems.length === 0) {
+        container.innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-eye"></i>
+                <h3>Geen content om te previewen</h3>
+                <p>Voeg eerst pagina's toe in stap 2 (Navigatie)</p>
+            </div>
+        `;
+        return;
+    }
+    
     // Genereer navigatie HTML
     let navHTML = '';
-    if (App.navItems) {
-        App.navItems.forEach(item => {
-            navHTML += `<a href="${item.link}" style="color:${App.primaryColor}; text-decoration:none; font-weight:500;">${item.label}</a>`;
-        });
-    }
+    App.navItems.forEach(item => {
+        navHTML += `<a href="${item.link}" style="color:${App.primaryColor}; text-decoration:none; font-weight:500;">${item.label}</a>`;
+    });
     
     let navBgStyle = 'background: ' + (App.navBgColor || '#ffffff') + ';';
     if (App.navBgImage) {
@@ -26,12 +35,13 @@ function generatePreview() {
                     ${App.logo ? `<img src="${App.logo}" style="max-height:40px;">` : (App.siteTitle || 'Mijn Website')}
                 </div>
                 <div style="display:flex; gap:20px; flex-wrap:wrap;">
-                    ${navHTML || '<span style="color:#a0aec0;">Geen navigatie</span>'}
+                    ${navHTML}
                 </div>
             </div>
             <div style="padding:30px;">
     `;
     
+    let hasContent = false;
     App.navItems.forEach(item => {
         const pageName = item.link.replace('#', '');
         const blocks = pageBlocks[pageName] || [];
@@ -44,12 +54,14 @@ function generatePreview() {
         
         let pageHTML = renderBlocksForExport(blocks);
         
+        if (pageHTML) hasContent = true;
+        
         html += `
             <div style="${bgStyle} padding:20px; border-radius:12px; margin-bottom:20px; border:1px solid #e2e8f0;">
                 <h3 style="color:#2d3748; border-bottom:3px solid ${App.primaryColor || '#4f8cf7'}; padding-bottom:8px; margin-bottom:15px;">
                     ${item.label}
                 </h3>
-                ${pageHTML || '<p style="color:#a0aec0;">Geen content</p>'}
+                ${pageHTML || '<p style="color:#a0aec0;">Geen content op deze pagina</p>'}
             </div>
         `;
     });
@@ -148,11 +160,9 @@ function generateAndDownload() {
     
     // Genereer navigatie
     let navHTML = '';
-    if (App.navItems) {
-        App.navItems.forEach(item => {
-            navHTML += `<a href="${item.link}">${item.label}</a>`;
-        });
-    }
+    App.navItems.forEach(item => {
+        navHTML += `<a href="${item.link}">${item.label}</a>`;
+    });
     
     let navStyle = `background: ${App.navBgColor || '#ffffff'};`;
     if (App.navBgImage) {
@@ -320,7 +330,7 @@ function generateAndDownload() {
             ${App.logo ? `<img src="${App.logo}" alt="Logo">` : `${siteTitle} <span>●</span>`}
         </a>
         <div class="nav-links" id="navLinks">
-            ${navHTML || '<span style="color:#a0aec0;">Geen navigatie</span>'}
+            ${navHTML}
         </div>
         ${App.navStyle === 'hamburger' ? `<button class="hamburger-btn" onclick="document.getElementById('navLinks').classList.toggle('show')">☰</button>` : ''}
     </nav>

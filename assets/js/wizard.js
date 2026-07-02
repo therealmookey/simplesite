@@ -7,13 +7,9 @@ function initWizard() {
     const nextBtns = document.querySelectorAll('.next-step');
     const prevBtns = document.querySelectorAll('.prev-step');
 
-    // Initialize state
+    // Initialize state - ALLES LEEG
     if (!App.navItems) {
-        App.navItems = [
-            { label: 'Home', link: '#home' },
-            { label: 'Over ons', link: '#over' },
-            { label: 'Contact', link: '#contact' }
-        ];
+        App.navItems = [];  // LEEG - gebruiker voegt zelf toe
     }
     if (!App.pageBackgrounds) {
         App.pageBackgrounds = {};
@@ -22,21 +18,7 @@ function initWizard() {
         window.pageBlocks = {};
     }
 
-    // Initialize blocks for each nav item
-    App.navItems.forEach(item => {
-        const pageName = item.link.replace('#', '');
-        if (!pageBlocks[pageName]) {
-            pageBlocks[pageName] = [];
-        }
-        if (!App.pageBackgrounds[pageName]) {
-            App.pageBackgrounds[pageName] = { color: '#f8fafc', image: null };
-        }
-    });
-
-    // Set default current page
-    if (App.navItems.length > 0) {
-        App.currentPage = App.navItems[0].link.replace('#', '');
-    }
+    // Geen default pagina's!
 
     steps.forEach(step => {
         step.addEventListener('click', function() {
@@ -49,7 +31,6 @@ function initWizard() {
         btn.addEventListener('click', function() {
             const currentStep = App.currentStep;
             if (currentStep < 4) {
-                // Stap 1: Algemeen
                 if (currentStep === 1) {
                     const title = document.getElementById('siteTitle').value.trim();
                     if (!title) {
@@ -69,7 +50,6 @@ function initWizard() {
                     }
                 }
                 
-                // Stap 2: Navigatie
                 if (currentStep === 2) {
                     App.navStyle = document.getElementById('navStyle').value;
                     App.navBgColor = document.getElementById('navBgColor').value;
@@ -82,9 +62,6 @@ function initWizard() {
                         };
                         reader.readAsDataURL(navBgFile);
                     }
-                    
-                    // Update page selector voor stap 3
-                    updatePageSelector();
                 }
                 
                 goToStep(currentStep + 1);
@@ -135,6 +112,18 @@ function initWizard() {
         document.getElementById('newNavItemLink').value = '#';
         renderNavItems();
         updatePageSelector();
+        
+        // Als er nog geen huidige pagina is, selecteer de eerste
+        if (!App.currentPage || !App.navItems.some(item => item.link.replace('#', '') === App.currentPage)) {
+            App.currentPage = pageName;
+            updatePageSelector();
+            if (typeof renderBlocks === 'function') {
+                renderBlocks();
+            }
+            if (typeof updateStructureTree === 'function') {
+                updateStructureTree();
+            }
+        }
     });
 
     // Page selector change
@@ -193,6 +182,7 @@ function initWizard() {
     // Pagina background
     document.getElementById('pageBgColor').addEventListener('input', function() {
         const page = App.currentPage;
+        if (!page) return;
         if (!App.pageBackgrounds) App.pageBackgrounds = {};
         if (!App.pageBackgrounds[page]) {
             App.pageBackgrounds[page] = { color: '#f8fafc', image: null };
@@ -209,6 +199,7 @@ function initWizard() {
             const reader = new FileReader();
             reader.onload = function(ev) {
                 const page = App.currentPage;
+                if (!page) return;
                 if (!App.pageBackgrounds) App.pageBackgrounds = {};
                 if (!App.pageBackgrounds[page]) {
                     App.pageBackgrounds[page] = { color: '#f8fafc', image: null };
@@ -226,6 +217,7 @@ function initWizard() {
 
     document.getElementById('clearPageBg').addEventListener('click', function() {
         const page = App.currentPage;
+        if (!page) return;
         if (App.pageBackgrounds && App.pageBackgrounds[page]) {
             App.pageBackgrounds[page].color = '#f8fafc';
             App.pageBackgrounds[page].image = null;
@@ -302,7 +294,7 @@ function renderNavItems() {
     if (!container) return;
     
     if (App.navItems.length === 0) {
-        container.innerHTML = '<p style="color:#a0aec0; font-size:13px;">Geen navigatie items. Voeg er hieronder een toe.</p>';
+        container.innerHTML = '<p style="color:#a0aec0; font-size:13px;">Nog geen pagina\'s. Voeg ze hieronder toe.</p>';
         return;
     }
     
@@ -332,6 +324,11 @@ function removeNavItem(index) {
     const pageName = item.link.replace('#', '');
     delete pageBlocks[pageName];
     delete App.pageBackgrounds[pageName];
+    
+    // Reset current page als die verwijderd is
+    if (App.currentPage === pageName) {
+        App.currentPage = App.navItems.length > 0 ? App.navItems[0].link.replace('#', '') : null;
+    }
     
     renderNavItems();
     updatePageSelector();
@@ -368,6 +365,7 @@ function updatePageSelector() {
 // ===== BACKGROUND UI =====
 function updatePageBackgroundUI() {
     const page = App.currentPage;
+    if (!page) return;
     const bg = App.pageBackgrounds?.[page] || { color: '#f8fafc', image: null };
     document.getElementById('pageBgColor').value = bg.color || '#f8fafc';
     if (bg.image) {
@@ -383,6 +381,7 @@ function updatePageBackgroundUI() {
 
 function updatePageCanvasBackground() {
     const page = App.currentPage;
+    if (!page) return;
     const bg = App.pageBackgrounds?.[page] || { color: '#f8fafc', image: null };
     const canvas = document.getElementById('pageCanvas');
     if (bg.image) {

@@ -158,6 +158,10 @@ function initBlocks() {
 
     // Blok toevoegen via knop in canvas
     document.getElementById('addBlockToPage').addEventListener('click', function() {
+        if (!App.currentPage || !pageBlocks[App.currentPage]) {
+            alert('Voeg eerst een pagina toe in stap 2 (Navigatie)!');
+            return;
+        }
         showBlockTypeSelector();
     });
 
@@ -170,13 +174,18 @@ function initBlocks() {
     });
 
     // Initialize empty state
-    if (!pageBlocks[App.currentPage]) {
-        pageBlocks[App.currentPage] = [];
+    if (!App.currentPage || !pageBlocks[App.currentPage]) {
+        // Geen huidige pagina
     }
 }
 
 // ===== BLOK TOEVOEGEN =====
 function addBlockToPage(type, parentId = null) {
+    if (!App.currentPage || !pageBlocks[App.currentPage]) {
+        alert('Voeg eerst een pagina toe in stap 2 (Navigatie)!');
+        return;
+    }
+    
     const blockType = BLOCK_TYPES[type];
     if (!blockType) return;
 
@@ -287,6 +296,19 @@ function renderBlocks() {
     const container = document.getElementById('blocksContainer');
     const blocks = pageBlocks[App.currentPage] || [];
     
+    if (!App.currentPage || App.navItems.length === 0) {
+        container.innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-cubes"></i>
+                <h3>Geen pagina's</h3>
+                <p>Voeg eerst een pagina toe in stap 2 (Navigatie)</p>
+            </div>
+        `;
+        const tree = document.getElementById('structureTree');
+        if (tree) tree.innerHTML = '<p style="color:#a0aec0; font-size:13px; text-align:center; padding:10px;">Geen pagina\'s</p>';
+        return;
+    }
+    
     if (blocks.length === 0) {
         container.innerHTML = `
             <div class="empty-state" id="emptyBlocksState">
@@ -295,8 +317,7 @@ function renderBlocks() {
                 <p>Klik op "Blok toevoegen" of kies een blok uit de sidebar</p>
             </div>
         `;
-        const tree = document.getElementById('structureTree');
-        if (tree) tree.innerHTML = '<p style="color:#a0aec0; font-size:13px; text-align:center;">Geen blokken</p>';
+        updateStructureTree();
         return;
     }
     
@@ -406,6 +427,11 @@ function renderBlocksRecursive(blocks, level = 0) {
 function updateStructureTree() {
     const container = document.getElementById('structureTree');
     const blocks = pageBlocks[App.currentPage] || [];
+    
+    if (!App.currentPage || App.navItems.length === 0) {
+        container.innerHTML = '<p style="color:#a0aec0; font-size:13px; text-align:center; padding:10px;">Geen pagina\'s</p>';
+        return;
+    }
     
     if (blocks.length === 0) {
         container.innerHTML = '<p style="color:#a0aec0; font-size:13px; text-align:center; padding:10px;">Geen blokken</p>';
