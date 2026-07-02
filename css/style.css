@@ -31,7 +31,7 @@ ul {
    HEADER & NAVIGATIE
    ======================================== */
 header {
-    background: linear-gradient(135deg, #2c3e50, #34495e);
+    background: #2c3e50;
     color: #fff;
     padding: 1rem 0;
     position: sticky;
@@ -61,10 +61,6 @@ nav {
     color: #3498db;
 }
 
-.logo a span {
-    color: #3498db;
-}
-
 .nav-links {
     display: flex;
     gap: 2rem;
@@ -80,11 +76,6 @@ nav {
 }
 
 .nav-links a:hover {
-    color: #3498db;
-    border-bottom: 2px solid #3498db;
-}
-
-.nav-links a.active {
     color: #3498db;
     border-bottom: 2px solid #3498db;
 }
@@ -106,22 +97,6 @@ main {
     padding: 6rem 2rem;
     position: relative;
     overflow: hidden;
-}
-
-.hero::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 70%);
-    animation: rotate 20s linear infinite;
-}
-
-@keyframes rotate {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
 }
 
 .hero h1 {
@@ -160,24 +135,42 @@ main {
     background: #f0f0f0;
 }
 
+.btn-secondary {
+    display: inline-block;
+    background: transparent;
+    color: #3498db;
+    padding: 0.8rem 2.5rem;
+    border-radius: 50px;
+    font-weight: bold;
+    font-size: 1.1rem;
+    border: 2px solid #3498db;
+    transition: all 0.3s ease;
+}
+
+.btn-secondary:hover {
+    background: #3498db;
+    color: #fff;
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(52, 152, 219, 0.3);
+}
+
 /* ========================================
    FEATURES SECTIE
    ======================================== */
-#features {
+.features {
     max-width: 1200px;
     margin: 4rem auto;
     padding: 0 2rem;
+    text-align: center;
 }
 
-#features h2 {
-    text-align: center;
+.features h2 {
     font-size: 2.5rem;
     color: #2c3e50;
-    margin-bottom: 1rem;
+    margin-bottom: 0.5rem;
 }
 
-#features > p {
-    text-align: center;
+.subtitle {
     color: #7f8c8d;
     font-size: 1.1rem;
     margin-bottom: 3rem;
@@ -185,80 +178,147 @@ main {
 
 .features-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     gap: 2rem;
 }
 
-.feature {
+.feature-card {
     background: #fff;
     padding: 2.5rem 2rem;
     border-radius: 12px;
-    text-align: center;
     box-shadow: 0 2px 15px rgba(0,0,0,0.08);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
+    text-align: center;
 }
 
-.feature:hover {
+.feature-card:hover {
     transform: translateY(-5px);
     box-shadow: 0 8px 30px rgba(0,0,0,0.12);
 }
 
-.feature h3 {
-    font-size: 2.5rem;
-    margin-bottom: 0.5rem;
+.feature-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
 }
 
-.feature h4 {
+.feature-card h3 {
     font-size: 1.3rem;
     color: #2c3e50;
     margin-bottom: 0.5rem;
 }
 
-.feature p {
+.feature-card p {
     color: #7f8c8d;
 }
 
 /* ========================================
-   ABOUT PAGINA
+   PRIJZEN SECTIE
    ======================================== */
-.about {
-    max-width: 900px;
-    margin: 4rem auto;
-    padding: 0 2rem;
+.pricing {
+    background: #ecf0f1;
+    padding: 4rem 2rem;
+    text-align: center;
 }
 
-.about h1 {
-    font-size: 2.8rem;
+.pricing h2 {
+    font-size: 2.5rem;
     color: #2c3e50;
+    margin-bottom: 0.5rem;
+}
+
+.pricing-grid {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+.pricing-card {
+    background: #fff;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    position: relative;
+}
+
+.pricing-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+}
+
+.pricing-card.popular {
+    border: 2px solid #3498db;
+    transform: scale(1.05);
+}
+
+.pricing-card.popular:hover {
+    transform: scale(1.05) translateY(-5px);
+}
+
+.pricing-card .badge {
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #3498db;
+    color: #fff;
+    padding: 0.3rem 1.5rem;
+    border-radius: 50px;
+    font-size: 0.85rem;
+    font-weight: bold;
+}
+
+.pricing-card h3 {
+    font-size: 1.5rem;
+    color: #2c3e50;
+    margin-bottom: 0.5rem;
+    margin-top: 1rem;
+}
+
+.pricing-card .price {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #2c3e50;
+}
+
+.pricing-card .period {
+    color: #7f8c8d;
     margin-bottom: 1.5rem;
 }
 
-.about p {
-    font-size: 1.1rem;
+.pricing-card ul {
+    text-align: left;
+    margin: 1.5rem 0;
+    padding: 0;
+}
+
+.pricing-card ul li {
+    padding: 0.5rem 0;
     color: #555;
-    margin-bottom: 1rem;
-    line-height: 1.8;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.pricing-card ul li:last-child {
+    border-bottom: none;
 }
 
 /* ========================================
-   CONTACT PAGINA
+   CONTACT SECTIE
    ======================================== */
 .contact {
-    max-width: 900px;
+    max-width: 700px;
     margin: 4rem auto;
     padding: 0 2rem;
+    text-align: center;
 }
 
-.contact h1 {
-    font-size: 2.8rem;
+.contact h2 {
+    font-size: 2.5rem;
     color: #2c3e50;
-    margin-bottom: 1rem;
-}
-
-.contact > p {
-    color: #7f8c8d;
-    font-size: 1.1rem;
-    margin-bottom: 2rem;
+    margin-bottom: 0.5rem;
 }
 
 .contact-form {
@@ -266,21 +326,23 @@ main {
     padding: 2.5rem;
     border-radius: 12px;
     box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+    margin-top: 2rem;
+    text-align: left;
 }
 
-.form-group {
+.contact-form .form-group {
     margin-bottom: 1.5rem;
 }
 
-.form-group label {
+.contact-form label {
     display: block;
     font-weight: 600;
     color: #2c3e50;
     margin-bottom: 0.5rem;
 }
 
-.form-group input,
-.form-group textarea {
+.contact-form input,
+.contact-form textarea {
     width: 100%;
     padding: 0.8rem 1rem;
     border: 2px solid #e0e0e0;
@@ -290,76 +352,37 @@ main {
     font-family: inherit;
 }
 
-.form-group input:focus,
-.form-group textarea:focus {
+.contact-form input:focus,
+.contact-form textarea:focus {
     outline: none;
     border-color: #3498db;
 }
 
-.form-group textarea {
-    height: 150px;
+.contact-form textarea {
     resize: vertical;
 }
 
-.btn-submit {
-    background: linear-gradient(135deg, #3498db, #2980b9);
-    color: #fff;
-    padding: 0.8rem 2.5rem;
+.contact-form .btn-primary {
+    width: 100%;
+    text-align: center;
     border: none;
-    border-radius: 50px;
-    font-size: 1.1rem;
-    font-weight: bold;
     cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.btn-submit:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 5px 20px rgba(52, 152, 219, 0.4);
+    font-size: 1.1rem;
 }
 
 /* ========================================
    FOOTER
    ======================================== */
 footer {
-    background: linear-gradient(135deg, #2c3e50, #1a252f);
+    background: #2c3e50;
     color: #ecf0f1;
-    padding: 3rem 2rem;
-    margin-top: 3rem;
-}
-
-.footer-content {
-    max-width: 1200px;
-    margin: 0 auto;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 2rem;
-}
-
-.footer-section h4 {
-    color: #3498db;
-    margin-bottom: 1rem;
-    font-size: 1.1rem;
-}
-
-.footer-section p,
-.footer-section a {
-    color: #bdc3c7;
-    line-height: 1.8;
-}
-
-.footer-section a:hover {
-    color: #3498db;
-}
-
-.footer-bottom {
-    max-width: 1200px;
-    margin: 2rem auto 0;
-    padding-top: 2rem;
-    border-top: 1px solid #34495e;
     text-align: center;
-    color: #bdc3c7;
-    font-size: 0.9rem;
+    padding: 2rem;
+    margin-top: 2rem;
+}
+
+.footer-content p {
+    margin: 0;
 }
 
 /* ========================================
@@ -399,7 +422,7 @@ footer {
     }
     
     /* Features */
-    #features h2 {
+    .features h2 {
         font-size: 2rem;
     }
     
@@ -407,20 +430,22 @@ footer {
         grid-template-columns: 1fr;
     }
     
-    /* About & Contact */
-    .about h1,
-    .contact h1 {
-        font-size: 2rem;
+    /* Pricing */
+    .pricing-grid {
+        grid-template-columns: 1fr;
     }
     
+    .pricing-card.popular {
+        transform: scale(1);
+    }
+    
+    .pricing-card.popular:hover {
+        transform: translateY(-5px);
+    }
+    
+    /* Contact */
     .contact-form {
         padding: 1.5rem;
-    }
-    
-    /* Footer */
-    .footer-content {
-        grid-template-columns: 1fr;
-        text-align: center;
     }
 }
 
@@ -429,12 +454,13 @@ footer {
         font-size: 1.8rem;
     }
     
-    .btn-primary {
+    .btn-primary,
+    .btn-secondary {
         padding: 0.6rem 1.8rem;
         font-size: 1rem;
     }
     
-    .feature {
-        padding: 1.5rem;
+    .pricing-card .price {
+        font-size: 2rem;
     }
 }
