@@ -21,6 +21,7 @@
     left: 0;
     bottom: 0;
     padding: 2rem 0;
+    z-index: 100;
 }
 
 .admin-logo {
@@ -53,6 +54,7 @@
 .admin-nav {
     flex: 1;
     padding: 1.5rem 0;
+    overflow-y: auto;
 }
 
 .admin-nav ul {
@@ -73,6 +75,7 @@
     transition: all 0.2s;
     font-size: 0.95rem;
     border-right: 3px solid transparent;
+    cursor: pointer;
 }
 
 .admin-nav a:hover {
@@ -98,6 +101,7 @@
     color: #6b7280;
     font-size: 0.9rem;
     transition: color 0.2s;
+    text-decoration: none;
 }
 
 .btn-back:hover {
@@ -180,6 +184,9 @@
     padding: 2px;
 }
 
+/* ========================================
+   KNOPPEN
+   ======================================== */
 .btn-save {
     padding: 0.7rem 2rem;
     background: #1a1a1a;
@@ -227,6 +234,19 @@
     margin-bottom: 0.5rem;
 }
 
+.btn-delete-page {
+    background: none;
+    border: none;
+    color: #ef4444;
+    cursor: pointer;
+    font-size: 0.9rem;
+    padding: 0 0.5rem;
+}
+
+.btn-delete-page:hover {
+    color: #dc2626;
+}
+
 /* ========================================
    DOWNLOAD
    ======================================== */
@@ -253,6 +273,154 @@
 
 .btn-download:hover {
     background: #1d4ed8;
+}
+
+/* ========================================
+   PREVIEW
+   ======================================== */
+.preview-controls {
+    display: flex;
+    gap: 0.8rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.btn-preview {
+    padding: 0.5rem 1.2rem;
+    background: #f3f4f6;
+    color: #4a4a4a;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-preview:hover {
+    background: #e5e7eb;
+}
+
+.btn-preview.active {
+    background: #2563eb;
+    color: #ffffff;
+    border-color: #2563eb;
+}
+
+.btn-refresh {
+    padding: 0.5rem 1.2rem;
+    background: #f3f4f6;
+    color: #4a4a4a;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-left: auto;
+}
+
+.btn-refresh:hover {
+    background: #e5e7eb;
+}
+
+.preview-container {
+    background: #f0f0f0;
+    border-radius: 12px;
+    padding: 2rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 500px;
+    position: relative;
+    overflow: hidden;
+}
+
+.preview-frame {
+    background: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    width: 100%;
+    max-width: 1100px;
+    height: 500px;
+    overflow-y: auto;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.preview-frame.mobile {
+    max-width: 380px;
+    height: 650px;
+    border-radius: 20px;
+}
+
+.preview-frame.tablet {
+    max-width: 768px;
+    height: 600px;
+}
+
+.preview-content {
+    padding: 0;
+    min-height: 100%;
+    background: #ffffff;
+}
+
+#preview-site {
+    min-height: 100%;
+}
+
+.preview-status {
+    margin-top: 1rem;
+    padding: 0.8rem 1.5rem;
+    background: #f0fdf4;
+    border-radius: 8px;
+    border-left: 4px solid #22c55e;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.preview-status span:first-child {
+    color: #16a34a;
+    font-weight: 500;
+    font-size: 0.95rem;
+}
+
+.preview-status span:last-child {
+    color: #6b7280;
+    font-size: 0.85rem;
+}
+
+/* Split view */
+.preview-container.split-view {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    padding: 1rem;
+}
+
+.preview-container.split-view .preview-frame {
+    height: 450px;
+}
+
+.preview-container.split-view .preview-frame:last-child {
+    border-left: 2px dashed #e0e0e0;
+    padding-left: 1rem;
+}
+
+.preview-container.split-view .preview-frame:first-child {
+    padding-right: 1rem;
+}
+
+/* Preview update animatie */
+.preview-frame.updating {
+    animation: previewPulse 0.3s ease;
+}
+
+@keyframes previewPulse {
+    0% { opacity: 0.7; }
+    50% { opacity: 1; }
+    100% { opacity: 0.7; }
 }
 
 /* ========================================
@@ -314,163 +482,7 @@
     .admin-form {
         padding: 1.5rem;
     }
-}
-/* ========================================
-   PREVIEW CONTROLS
-   ======================================== */
-.preview-controls {
-    display: flex;
-    gap: 0.8rem;
-    margin-bottom: 1.5rem;
-    flex-wrap: wrap;
-}
 
-.btn-preview {
-    padding: 0.5rem 1.2rem;
-    background: #f3f4f6;
-    color: #4a4a4a;
-    border: 1px solid #e0e0e0;
-    border-radius: 6px;
-    font-size: 0.9rem;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.btn-preview:hover {
-    background: #e5e7eb;
-}
-
-.btn-preview.active {
-    background: #2563eb;
-    color: #ffffff;
-    border-color: #2563eb;
-}
-
-.btn-refresh {
-    padding: 0.5rem 1.2rem;
-    background: #f3f4f6;
-    color: #4a4a4a;
-    border: 1px solid #e0e0e0;
-    border-radius: 6px;
-    font-size: 0.9rem;
-    cursor: pointer;
-    transition: all 0.2s;
-    margin-left: auto;
-}
-
-.btn-refresh:hover {
-    background: #e5e7eb;
-}
-
-/* ========================================
-   PREVIEW CONTAINER
-   ======================================== */
-.preview-container {
-    background: #f0f0f0;
-    border-radius: 12px;
-    padding: 2rem;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 500px;
-    position: relative;
-    overflow: hidden;
-}
-
-.preview-frame {
-    background: #ffffff;
-    border-radius: 8px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-    width: 100%;
-    max-width: 1100px;
-    height: 500px;
-    overflow-y: auto;
-    transition: all 0.3s ease;
-    position: relative;
-}
-
-.preview-frame.mobile {
-    max-width: 380px;
-    height: 650px;
-    border-radius: 20px;
-}
-
-.preview-frame.tablet {
-    max-width: 768px;
-    height: 600px;
-}
-
-.preview-content {
-    padding: 0;
-    min-height: 100%;
-    background: #ffffff;
-}
-
-/* ========================================
-   PREVIEW SITE STYLING
-   ======================================== */
-#preview-site {
-    min-height: 100%;
-}
-
-.preview-header {
-    transition: all 0.3s ease;
-}
-
-.preview-hero {
-    transition: all 0.3s ease;
-    min-height: 200px;
-}
-
-.preview-hero h1 {
-    transition: color 0.3s ease;
-}
-
-.preview-hero p {
-    transition: color 0.3s ease;
-}
-
-.preview-footer {
-    transition: all 0.3s ease;
-}
-
-/* ========================================
-   PREVIEW TIPS
-   ======================================== */
-.preview-tips {
-    margin-top: 1rem;
-    padding: 1rem 1.5rem;
-    background: #f0f7ff;
-    border-radius: 8px;
-    border-left: 4px solid #2563eb;
-}
-
-.preview-tips p {
-    color: #4a4a4a;
-    font-size: 0.95rem;
-    margin: 0;
-}
-
-/* ========================================
-   DELETE PAGE BUTTON
-   ======================================== */
-.btn-delete-page {
-    background: none;
-    border: none;
-    color: #ef4444;
-    cursor: pointer;
-    font-size: 0.9rem;
-    padding: 0 0.5rem;
-}
-
-.btn-delete-page:hover {
-    color: #dc2626;
-}
-
-/* ========================================
-   RESPONSIVE PREVIEW
-   ======================================== */
-@media (max-width: 768px) {
     .preview-container {
         padding: 1rem;
         min-height: 400px;
@@ -490,114 +502,6 @@
         height: 450px;
     }
 
-    .preview-controls {
-        gap: 0.5rem;
-    }
-
-    .btn-preview,
-    .btn-refresh {
-        padding: 0.4rem 0.8rem;
-        font-size: 0.8rem;
-    }
-
-    .btn-refresh {
-        margin-left: 0;
-    }
-
-    .preview-tips {
-        padding: 0.8rem 1rem;
-        font-size: 0.9rem;
-    }
-}/* ========================================
-   PREVIEW STATUS
-   ======================================== */
-.preview-status {
-    margin-top: 1rem;
-    padding: 0.8rem 1.5rem;
-    background: #f0fdf4;
-    border-radius: 8px;
-    border-left: 4px solid #22c55e;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-}
-
-.preview-status span:first-child {
-    color: #16a34a;
-    font-weight: 500;
-    font-size: 0.95rem;
-}
-
-.preview-status span:last-child {
-    color: #6b7280;
-    font-size: 0.85rem;
-}
-
-/* ========================================
-   SPLIT VIEW
-   ======================================== */
-.preview-container.split-view {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
-    padding: 1rem;
-}
-
-.preview-container.split-view .preview-frame {
-    height: 450px;
-}
-
-.preview-container.split-view .preview-frame:last-child {
-    border-left: 2px dashed #e0e0e0;
-    padding-left: 1rem;
-}
-
-.preview-container.split-view .preview-frame:first-child {
-    padding-right: 1rem;
-}
-
-/* ========================================
-   EDITOR MODE IN PREVIEW
-   ======================================== */
-.preview-editor-mode .preview-hero {
-    border: 2px dashed #2563eb;
-    border-radius: 8px;
-    padding: 1rem;
-    position: relative;
-}
-
-.preview-editor-mode .preview-hero::before {
-    content: '✏️ Bewerk modus';
-    position: absolute;
-    top: -12px;
-    right: 10px;
-    background: #2563eb;
-    color: #fff;
-    font-size: 0.7rem;
-    padding: 0.2rem 0.8rem;
-    border-radius: 4px;
-    font-weight: 600;
-}
-
-/* ========================================
-   ANIMATIE VOOR PREVIEW UPDATES
-   ======================================== */
-.preview-frame.updating {
-    animation: previewPulse 0.3s ease;
-}
-
-@keyframes previewPulse {
-    0% { opacity: 0.7; }
-    50% { opacity: 1; }
-    100% { opacity: 0.7; }
-}
-
-/* ========================================
-   RESPONSIVE PREVIEW
-   ======================================== */
-@media (max-width: 992px) {
     .preview-container.split-view {
         grid-template-columns: 1fr;
     }
@@ -607,12 +511,5 @@
         border-top: 2px dashed #e0e0e0;
         padding-left: 0;
         padding-top: 1rem;
-    }
-}
-
-@media (max-width: 768px) {
-    .preview-status {
-        flex-direction: column;
-        text-align: center;
     }
 }
