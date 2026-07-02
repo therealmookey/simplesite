@@ -1,6 +1,11 @@
 // ========================================
-// ADMIN JAVASCRIPT - MET PREVIEW
+// SIMPLESITE BUILDER - WYSIWYG
 // ========================================
+
+let currentDevice = 'desktop';
+let splitViewActive = false;
+let autoSaveTimer = null;
+let previewUpdateTimeout = null;
 
 document.addEventListener('DOMContentLoaded', function() {
     
@@ -24,292 +29,344 @@ document.addEventListener('DOMContentLoaded', function() {
             if (target) {
                 target.classList.add('active');
             }
+            
+            // Update preview als we naar preview tab gaan
+            if (sectionId === 'preview') {
+                setTimeout(updatePreview, 100);
+            }
         });
     });
 
     // ========================================
-    // 2. ALGEMEEN OPSLAAN
+    // 2. PAGINA'S TOEVOEGEN
     // ========================================
-    const saveGeneralBtn = document.getElementById('save-general');
-    if (saveGeneralBtn) {
-        saveGeneralBtn.addEventListener('click', function() {
-            const title = document.getElementById('site-title').value;
-            const description = document.getElementById('site-description').value;
-            
-            const settings = getSettings();
-            settings.title = title;
-            settings.description = description;
-            saveSettings(settings);
-            
-            showFeedback(this, '✓ Opgeslagen!');
-            updatePreview();
-        });
-    }
+    document.getElementById('add-page').addEventListener('click', function() {
+        const input = document.getElementById('page-name');
+        const name = input.value.trim();
+        
+        if (!name) {
+            alert('Voer een paginanaam in');
+            return;
+        }
+        
+        const pageId = name.toLowerCase().replace(/\s/g, '-');
+        
+        // Check if page already exists
+        if (document.querySelector(`[data-page="${pageId}"]`)) {
+            alert('Deze pagina bestaat al!');
+            return;
+        }
+        
+        // Add to list
+        const list = document.getElementById('page-list');
+        const item = document.createElement('div');
+        item.className = 'page-item';
+        item.dataset.page = pageId;
+        item.innerHTML = `
+            <span>📄 ${name}</span>
+            <span style="color:#6b7280;font-size:0.85rem;">${pageId}.html</span>
+            <button class="btn-delete-page" data-page="${pageId}" onclick="deletePage('${pageId}', '${name}')">✕</button>
+        `;
+        list.appendChild(item);
+        
+        // Add to select
+        const select = document.getElementById('page-select');
+        const option = document.createElement('option');
+        option.value = pageId;
+        option.textContent = name;
+        select.appendChild(option);
+        
+        // Add to pages data
+        const settings = getSettings();
+        if (!settings.pages) settings.pages = {};
+        settings.pages[pageId] = { title: name, content: 'Schrijf hier je inhoud...' };
+        if (!settings.pageNames) settings.pageNames = {};
+        settings.pageNames[pageId] = name;
+        saveSettings(settings);
+        
+        input.value = '';
+        
+        // Update preview
+        updatePreview();
+    });
 
     // ========================================
-    // 3. PAGINA'S TOEVOEGEN
+    // 3. PAGINA VERWIJDEREN
     // ========================================
-    const addPageBtn = document.getElementById('add-page');
-    if (addPageBtn) {
-        addPageBtn.addEventListener('click', function() {
-            const input = document.getElementById('page-name');
-            const name = input.value.trim();
-            
-            if (name) {
-                const list = document.getElementById('page-list');
-                const pageId = name.toLowerCase().replace(/\s/g, '-');
-                
-                // Controleer of pagina al bestaat
-                if (document.querySelector(`[data-page="${pageId}"]`)) {
-                    alert('Deze pagina bestaat al!');
-                    return;
-                }
-                
-                const item = document.createElement('div');
-                item.className = 'page-item';
-                item.dataset.page = pageId;
-                item.innerHTML = `
-                    <span>📄 ${name}</span>
-                    <span style="color:#6b7280;font-size:0.85rem;">${pageId}.html</span>
-                    <button class="btn-delete-page" data-page="${pageId}">✕</button>
-                `;
-                list.appendChild(item);
-                
-                // Voeg toe aan select dropdown
-                const select = document.getElementById('page-select');
-                const option = document.createElement('option');
-                option.value = pageId;
-                option.textContent = name;
-                select.appendChild(option);
-                
-                input.value = '';
-                
-                // Verwijder functionaliteit
-                item.querySelector('.btn-delete-page').addEventListener('click', function() {
-                    if (confirm(`Weet je zeker dat je "${name}" wilt verwijderen?`)) {
-                        item.remove();
-                        // Verwijder uit select
-                        const opt = select.querySelector(`option[value="${pageId}"]`);
-                        if (opt) opt.remove();
-                    }
-                });
-                
-                // Sla pagina's op
-                savePages();
-            }
-        });
-    }
+    window.deletePage = function(pageId, name) {
+        if (!confirm(`Weet je zeker dat je "${name}" wilt verwijderen?`)) return;
+        
+        // Remove from list
+        const item = document.querySelector(`[data-page="${pageId}"]`);
+        if (item) item.remove();
+        
+        // Remove from select
+        const select = document.getElementById('page-select');
+        const option = select.querySelector(`option[value="${pageId}"]`);
+        if (option) option.remove();
+        
+        // Remove from settings
+        const settings = getSettings();
+        if (settings.pages) delete settings.pages[pageId];
+        if (settings.pageNames) delete settings.pageNames[pageId];
+        saveSettings(settings);
+        
+        // Switch to home
+        select.value = 'home';
+        loadPageContent('home');
+        updatePreview();
+    };
 
     // ========================================
-    // 4. PAGINA SELECT - LAAD INHOUD
+    // 4. PAGINA SELECT
     // ========================================
-    const pageSelect = document.getElementById('page-select');
-    const pageTitle = document.getElementById('page-title');
-    const pageContent = document.getElementById('page-content');
+    document.getElementById('page-select').addEventListener('change', function() {
+        loadPageContent(this.value);
+        updatePreview();
+    });
 
-    if (pageSelect) {
-        pageSelect.addEventListener('change', function() {
-            loadPageContent(this.value);
-        });
-    }
-
-    function loadPageContent(pageId) {
+    // ========================================
+    // 5. INHOUD LADEN
+    // ========================================
+    window.loadPageContent = function(pageId) {
         const settings = getSettings();
         const pages = settings.pages || {};
         const page = pages[pageId] || { title: 'Nieuwe pagina', content: 'Schrijf hier je inhoud...' };
         
-        if (pageTitle) pageTitle.value = page.title;
-        if (pageContent) pageContent.value = page.content;
-    }
+        document.getElementById('page-title').value = page.title || '';
+        document.getElementById('page-content').value = page.content || '';
+    };
 
     // ========================================
-    // 5. INHOUD OPSLAAN
+    // 6. AUTO SAVE
     // ========================================
-    const saveContentBtn = document.getElementById('save-content');
-    if (saveContentBtn) {
-        saveContentBtn.addEventListener('click', function() {
-            const pageId = pageSelect.value;
-            const title = pageTitle.value;
-            const content = pageContent.value;
+    window.autoSave = function() {
+        clearTimeout(autoSaveTimer);
+        autoSaveTimer = setTimeout(function() {
+            const pageId = document.getElementById('page-select').value;
+            const title = document.getElementById('page-title').value;
+            const content = document.getElementById('page-content').value;
             
             const settings = getSettings();
             if (!settings.pages) settings.pages = {};
             settings.pages[pageId] = { title, content };
             saveSettings(settings);
             
-            showFeedback(this, '✓ Inhoud opgeslagen!');
-            updatePreview();
-        });
-    }
+            // Update status
+            const timestamp = document.getElementById('preview-timestamp');
+            if (timestamp) {
+                const now = new Date();
+                timestamp.textContent = `Automatisch opgeslagen: ${now.toLocaleTimeString()}`;
+            }
+        }, 500);
+    };
 
     // ========================================
-    // 6. DESIGN OPSLAAN
+    // 7. EDITOR MODE
     // ========================================
-    const saveDesignBtn = document.getElementById('save-design');
-    if (saveDesignBtn) {
-        saveDesignBtn.addEventListener('click', function() {
-            const primaryColor = document.getElementById('primary-color').value;
-            const bgColor = document.getElementById('bg-color').value;
-            const textColor = document.getElementById('text-color').value;
-            
-            const settings = getSettings();
-            settings.primaryColor = primaryColor;
-            settings.bgColor = bgColor;
-            settings.textColor = textColor;
-            saveSettings(settings);
-            
-            showFeedback(this, '✓ Design opgeslagen!');
-            updatePreview();
-        });
-    }
+    window.toggleEditorMode = function() {
+        const container = document.getElementById('preview-container');
+        container.classList.toggle('preview-editor-mode');
+        updatePreview();
+    };
 
     // ========================================
-    // 7. KLEUR PICKER SYNC MET HEX
+    // 8. KLEUR FUNCTIES
     // ========================================
-    function syncColorPicker(colorId, hexId) {
-        const colorInput = document.getElementById(colorId);
-        const hexInput = document.getElementById(hexId);
-        
-        if (colorInput && hexInput) {
-            colorInput.addEventListener('input', function() {
-                hexInput.value = this.value;
-            });
-            
-            hexInput.addEventListener('input', function() {
-                if (/^#[0-9A-F]{6}$/i.test(this.value)) {
-                    colorInput.value = this.value;
-                }
-            });
+    window.updateColor = function(input) {
+        const hexInput = document.getElementById(input.id + '-hex');
+        if (hexInput) {
+            hexInput.value = input.value;
         }
-    }
-
-    syncColorPicker('primary-color', 'primary-color-hex');
-    syncColorPicker('bg-color', 'bg-color-hex');
-    syncColorPicker('text-color', 'text-color-hex');
-
-    // ========================================
-    // 8. PREVIEW FUNCTIES
-    // ========================================
-    
-    // Preview device knoppen
-    const previewMobile = document.getElementById('preview-mobile');
-    const previewDesktop = document.getElementById('preview-desktop');
-    const previewTablet = document.getElementById('preview-tablet');
-    const previewFrame = document.getElementById('preview-frame');
-    const refreshBtn = document.getElementById('refresh-preview');
-
-    if (previewMobile) {
-        previewMobile.addEventListener('click', function() {
-            setActivePreview(this);
-            previewFrame.className = 'preview-frame mobile';
-        });
-    }
-
-    if (previewDesktop) {
-        previewDesktop.addEventListener('click', function() {
-            setActivePreview(this);
-            previewFrame.className = 'preview-frame';
-        });
-    }
-
-    if (previewTablet) {
-        previewTablet.addEventListener('click', function() {
-            setActivePreview(this);
-            previewFrame.className = 'preview-frame tablet';
-        });
-    }
-
-    function setActivePreview(btn) {
-        document.querySelectorAll('.btn-preview').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-    }
-
-    if (refreshBtn) {
-        refreshBtn.addEventListener('click', function() {
-            updatePreview();
-            this.textContent = '✅ Vernieuwd!';
-            setTimeout(() => {
-                this.textContent = '🔄 Vernieuwen';
-            }, 1500);
-        });
-    }
-
-    // ========================================
-    // 9. PREVIEW UPDATE
-    // ========================================
-    function updatePreview() {
+        // Update settings
         const settings = getSettings();
+        const colorMap = {
+            'primary-color': 'primaryColor',
+            'bg-color': 'bgColor',
+            'text-color': 'textColor'
+        };
+        const key = colorMap[input.id];
+        if (key) {
+            settings[key] = input.value;
+            saveSettings(settings);
+        }
+    };
+
+    window.updateColorFromHex = function(input) {
+        const colorInput = document.getElementById(input.id.replace('-hex', ''));
+        if (colorInput && /^#[0-9A-F]{6}$/i.test(input.value)) {
+            colorInput.value = input.value;
+            const settings = getSettings();
+            const colorMap = {
+                'primary-color-hex': 'primaryColor',
+                'bg-color-hex': 'bgColor',
+                'text-color-hex': 'textColor'
+            };
+            const key = colorMap[input.id];
+            if (key) {
+                settings[key] = input.value;
+                saveSettings(settings);
+            }
+        }
+    };
+
+    // ========================================
+    // 9. DEVICE FUNCTIES
+    // ========================================
+    window.setDevice = function(device) {
+        currentDevice = device;
+        const frame = document.getElementById('preview-frame');
         
-        // Haal de huidige geselecteerde pagina op
-        const currentPage = pageSelect ? pageSelect.value : 'home';
+        // Reset classes
+        frame.className = 'preview-frame';
+        
+        if (device === 'mobile') {
+            frame.classList.add('mobile');
+        } else if (device === 'tablet') {
+            frame.classList.add('tablet');
+        }
+        
+        // Update button states
+        document.querySelectorAll('.btn-preview').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        document.getElementById(`preview-${device}`).classList.add('active');
+        
+        updatePreview();
+    };
+
+    // ========================================
+    // 10. SPLIT VIEW
+    // ========================================
+    window.toggleSplitView = function() {
+        splitViewActive = !splitViewActive;
+        const container = document.getElementById('preview-container');
+        const btn = document.getElementById('preview-split');
+        
+        if (splitViewActive) {
+            container.classList.add('split-view');
+            btn.classList.add('active');
+            // Duplicate preview for split view
+            createSplitView();
+        } else {
+            container.classList.remove('split-view');
+            btn.classList.remove('active');
+            // Remove duplicate
+            const duplicate = container.querySelector('.preview-frame.duplicate');
+            if (duplicate) duplicate.remove();
+        }
+        
+        updatePreview();
+    };
+
+    function createSplitView() {
+        const container = document.getElementById('preview-container');
+        const original = document.getElementById('preview-frame');
+        
+        // Remove existing duplicate
+        const existing = container.querySelector('.preview-frame.duplicate');
+        if (existing) existing.remove();
+        
+        // Create duplicate
+        const clone = original.cloneNode(true);
+        clone.className = 'preview-frame duplicate';
+        clone.id = 'preview-frame-duplicate';
+        container.appendChild(clone);
+        
+        // Sync content
+        clone.querySelector('.preview-content').innerHTML = original.querySelector('.preview-content').innerHTML;
+    }
+
+    // ========================================
+    // 11. REFRESH PREVIEW
+    // ========================================
+    window.refreshPreview = function() {
+        const frame = document.getElementById('preview-frame');
+        frame.classList.add('updating');
+        updatePreview();
+        setTimeout(() => {
+            frame.classList.remove('updating');
+        }, 300);
+    };
+
+    // ========================================
+    // 12. PREVIEW UPDATE (CORE WYSIWYG)
+    // ========================================
+    window.updatePreview = function() {
+        clearTimeout(previewUpdateTimeout);
+        previewUpdateTimeout = setTimeout(function() {
+            renderPreview();
+        }, 50);
+    };
+
+    function renderPreview() {
+        const settings = getSettings();
+        const pageId = document.getElementById('page-select').value;
         const pages = settings.pages || {};
-        const page = pages[currentPage] || { title: 'Welkom bij mijn website', content: 'Dit is de inhoud van mijn website.' };
+        const page = pages[pageId] || { title: 'Welkom bij mijn website', content: 'Dit is de inhoud van mijn website.' };
         
-        // Update preview titel
-        const previewTitle = document.getElementById('preview-hero-title');
-        if (previewTitle) {
-            previewTitle.textContent = page.title || 'Welkom bij mijn website';
-        }
+        // Haal actuele waarden op (voor real-time updates)
+        const currentTitle = document.getElementById('page-title').value || page.title;
+        const currentContent = document.getElementById('page-content').value || page.content;
+        const siteTitle = document.getElementById('site-title').value || 'SimpleSite';
+        const siteDesc = document.getElementById('site-description').value || '';
         
-        // Update preview tekst
-        const previewText = document.getElementById('preview-hero-text');
-        if (previewText) {
-            previewText.textContent = page.content || 'Dit is de inhoud van mijn website.';
-        }
-        
-        // Update kleuren
-        const header = document.querySelector('.preview-header');
-        const hero = document.querySelector('.preview-hero');
-        const footer = document.querySelector('.preview-footer');
-        const heroTitle = document.getElementById('preview-hero-title');
-        const heroText = document.getElementById('preview-hero-text');
-        
+        // Kleuren
         const primaryColor = settings.primaryColor || '#2563eb';
         const bgColor = settings.bgColor || '#ffffff';
         const textColor = settings.textColor || '#1a1a1a';
         
-        if (header) {
-            header.style.background = bgColor;
+        // Bouw de preview HTML
+        const previewHTML = `
+            <div class="preview-header" style="background:${bgColor};border-bottom:1px solid #f0f0f0;padding:1rem 2rem;display:flex;justify-content:space-between;align-items:center;">
+                <div style="font-size:1.4rem;font-weight:700;">
+                    <span style="color:${textColor};">${siteTitle}</span>
+                </div>
+                <div style="display:flex;gap:1.5rem;font-size:0.95rem;">
+                    <span style="color:${textColor};">Home</span>
+                    ${Object.keys(settings.pageNames || {}).filter(id => id !== 'home').map(id => 
+                        `<span style="color:${textColor};">${settings.pageNames[id]}</span>`
+                    ).join('')}
+                </div>
+            </div>
+            <div class="preview-hero" style="text-align:center;padding:4rem 2rem;background:${bgColor};">
+                <h1 style="font-size:2.5rem;color:${textColor};margin-bottom:1rem;">${currentTitle}</h1>
+                <p style="color:#6b7280;max-width:500px;margin:0 auto;font-size:1.1rem;">${currentContent}</p>
+                ${siteDesc ? `<p style="color:#6b7280;max-width:500px;margin:1rem auto 0;font-size:0.95rem;opacity:0.7;">${siteDesc}</p>` : ''}
+                <div style="margin-top:2rem;">
+                    <a href="#" style="display:inline-block;background:${primaryColor};color:#fff;padding:0.7rem 2rem;border-radius:6px;text-decoration:none;font-weight:600;">Begin nu</a>
+                </div>
+            </div>
+            <div class="preview-footer" style="background:#fafafa;border-top:1px solid #f0f0f0;padding:2rem;text-align:center;color:#6b7280;font-size:0.9rem;">
+                © 2026 SimpleSite — Simpel. Snel. Professioneel.
+            </div>
+        `;
+        
+        // Update main preview
+        const previewSite = document.getElementById('preview-site');
+        if (previewSite) {
+            previewSite.innerHTML = previewHTML;
         }
         
-        if (hero) {
-            hero.style.background = bgColor;
+        // Update duplicate if exists
+        const duplicate = document.getElementById('preview-frame-duplicate');
+        if (duplicate) {
+            const dupContent = duplicate.querySelector('.preview-content');
+            if (dupContent) {
+                dupContent.innerHTML = previewHTML;
+            }
         }
         
-        if (footer) {
-            footer.style.background = '#fafafa';
-        }
-        
-        if (heroTitle) {
-            heroTitle.style.color = textColor;
-        }
-        
-        if (heroText) {
-            heroText.style.color = '#6b7280';
-        }
-        
-        // Update logo kleur in preview
-        const logoSimple = document.querySelector('.preview-header [style*="color:#1a1a1a"]');
-        const logoSite = document.querySelector('.preview-header [style*="color:#2563eb"]');
-        if (logoSimple) {
-            logoSimple.style.color = textColor;
-        }
-        if (logoSite) {
-            logoSite.style.color = primaryColor;
-        }
-        
-        // Update de site titel in de preview header
-        const siteTitle = settings.title || 'SimpleSite';
-        const headerLogo = document.querySelector('.preview-header > div:first-child');
-        if (headerLogo) {
-            headerLogo.innerHTML = `
-                <span style="color:${textColor};">${siteTitle}</span>
-            `;
+        // Update timestamp
+        const timestamp = document.getElementById('preview-timestamp');
+        if (timestamp) {
+            const now = new Date();
+            timestamp.textContent = `Laatste update: ${now.toLocaleTimeString()}`;
         }
     }
 
     // ========================================
-    // 10. SETTINGS FUNCTIES
+    // 13. SETTINGS FUNCTIES
     // ========================================
     function getSettings() {
         const saved = localStorage.getItem('simplesite_settings');
@@ -325,130 +382,23 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function saveSettings(settings) {
         localStorage.setItem('simplesite_settings', JSON.stringify(settings));
-        // Update de pagina lijst ook
-        savePages();
-    }
-
-    function savePages() {
-        const settings = getSettings();
-        const pages = settings.pages || {};
-        // Sla alleen de paginanamen op
-        const pageNames = {};
-        document.querySelectorAll('#page-list .page-item').forEach(item => {
-            const pageId = item.dataset.page;
-            if (pageId && pageId !== 'home') {
-                const name = item.querySelector('span:first-child').textContent.replace('📄 ', '');
-                pageNames[pageId] = name;
-            }
-        });
-        // Zorg dat home altijd bestaat
-        if (!pageNames.home) {
-            pageNames.home = 'Home';
-        }
-        settings.pageNames = pageNames;
-        localStorage.setItem('simplesite_settings', JSON.stringify(settings));
-    }
-
-    function loadPages() {
-        const settings = getSettings();
-        const pageNames = settings.pageNames || { home: 'Home' };
-        const list = document.getElementById('page-list');
-        const select = document.getElementById('page-select');
-        
-        // Leeg de lijst (behalve home)
-        list.innerHTML = '';
-        select.innerHTML = '';
-        
-        // Voeg home toe
-        const homeItem = document.createElement('div');
-        homeItem.className = 'page-item';
-        homeItem.dataset.page = 'home';
-        homeItem.innerHTML = `
-            <span>🏠 Home</span>
-            <span style="color:#6b7280;font-size:0.85rem;">index.html</span>
-        `;
-        list.appendChild(homeItem);
-        
-        // Voeg home toe aan select
-        const homeOption = document.createElement('option');
-        homeOption.value = 'home';
-        homeOption.textContent = 'Home';
-        select.appendChild(homeOption);
-        
-        // Voeg andere pagina's toe
-        for (const [pageId, name] of Object.entries(pageNames)) {
-            if (pageId !== 'home') {
-                const item = document.createElement('div');
-                item.className = 'page-item';
-                item.dataset.page = pageId;
-                item.innerHTML = `
-                    <span>📄 ${name}</span>
-                    <span style="color:#6b7280;font-size:0.85rem;">${pageId}.html</span>
-                    <button class="btn-delete-page" data-page="${pageId}">✕</button>
-                `;
-                list.appendChild(item);
-                
-                const option = document.createElement('option');
-                option.value = pageId;
-                option.textContent = name;
-                select.appendChild(option);
-                
-                // Delete functionaliteit
-                item.querySelector('.btn-delete-page').addEventListener('click', function() {
-                    if (confirm(`Weet je zeker dat je "${name}" wilt verwijderen?`)) {
-                        item.remove();
-                        const opt = select.querySelector(`option[value="${pageId}"]`);
-                        if (opt) opt.remove();
-                        // Verwijder uit settings
-                        const settings = getSettings();
-                        if (settings.pages) {
-                            delete settings.pages[pageId];
-                        }
-                        if (settings.pageNames) {
-                            delete settings.pageNames[pageId];
-                        }
-                        saveSettings(settings);
-                    }
-                });
-            }
-        }
-        
-        // Laad de inhoud van de eerste pagina
-        loadPageContent('home');
     }
 
     // ========================================
-    // 11. FEEDBACK
+    // 14. DOWNLOAD
     // ========================================
-    function showFeedback(element, message) {
-        const original = element.textContent;
-        const originalBg = element.style.background;
-        element.textContent = message;
-        element.style.background = '#2563eb';
-        
-        setTimeout(() => {
-            element.textContent = original;
-            element.style.background = originalBg || '';
-        }, 2000);
-    }
+    document.querySelector('.btn-download').addEventListener('click', function() {
+        alert('📥 Je website wordt gedownload!\n\n(Zodra de betaalfunctionaliteit is toegevoegd, ontvang je hier je complete website-bestanden)');
+    });
 
     // ========================================
-    // 12. DOWNLOAD
-    // ========================================
-    const downloadBtn = document.querySelector('.btn-download');
-    if (downloadBtn) {
-        downloadBtn.addEventListener('click', function() {
-            alert('📥 Je website wordt gedownload!\n\n(Zodra de betaalfunctionaliteit is toegevoegd, ontvang je hier je complete website-bestanden)');
-        });
-    }
-
-    // ========================================
-    // 13. INIT
+    // 15. INIT
     // ========================================
     function init() {
-        // Laad opgeslagen instellingen
+        // Load settings
         const settings = getSettings();
         
+        // Fill fields
         if (settings.title) {
             document.getElementById('site-title').value = settings.title;
         }
@@ -468,15 +418,73 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('text-color-hex').value = settings.textColor;
         }
         
-        // Laad pagina's
-        loadPages();
+        // Load pages
+        const pageNames = settings.pageNames || { home: 'Home' };
+        const select = document.getElementById('page-select');
+        const list = document.getElementById('page-list');
         
-        // Update preview
-        setTimeout(updatePreview, 100);
+        // Clear list (keep home)
+        list.innerHTML = '';
+        select.innerHTML = '';
         
-        console.log('🚀 SimpleSite Builder is klaar!');
-        console.log('💡 Bewerk je website en bekijk de live preview.');
+        // Add home
+        const homeItem = document.createElement('div');
+        homeItem.className = 'page-item';
+        homeItem.dataset.page = 'home';
+        homeItem.innerHTML = `
+            <span>🏠 Home</span>
+            <span style="color:#6b7280;font-size:0.85rem;">index.html</span>
+        `;
+        list.appendChild(homeItem);
+        
+        const homeOption = document.createElement('option');
+        homeOption.value = 'home';
+        homeOption.textContent = 'Home';
+        select.appendChild(homeOption);
+        
+        // Add other pages
+        for (const [pageId, name] of Object.entries(pageNames)) {
+            if (pageId !== 'home') {
+                const item = document.createElement('div');
+                item.className = 'page-item';
+                item.dataset.page = pageId;
+                item.innerHTML = `
+                    <span>📄 ${name}</span>
+                    <span style="color:#6b7280;font-size:0.85rem;">${pageId}.html</span>
+                    <button class="btn-delete-page" data-page="${pageId}" onclick="deletePage('${pageId}', '${name}')">✕</button>
+                `;
+                list.appendChild(item);
+                
+                const option = document.createElement('option');
+                option.value = pageId;
+                option.textContent = name;
+                select.appendChild(option);
+            }
+        }
+        
+        // Load content for home
+        loadPageContent('home');
+        
+        // Initial preview
+        setTimeout(updatePreview, 200);
+        
+        console.log('🚀 SimpleSite WYSIWYG Builder is klaar!');
+        console.log('💡 Alles wat je verandert, zie je direct in de preview.');
     }
 
     init();
 });
+
+// ========================================
+// 16. GLOBALE FUNCTIES VOOR ONCLICK
+// ========================================
+window.updatePreview = updatePreview;
+window.loadPageContent = loadPageContent;
+window.autoSave = autoSave;
+window.toggleEditorMode = toggleEditorMode;
+window.updateColor = updateColor;
+window.updateColorFromHex = updateColorFromHex;
+window.setDevice = setDevice;
+window.toggleSplitView = toggleSplitView;
+window.refreshPreview = refreshPreview;
+window.deletePage = deletePage;

@@ -38,13 +38,12 @@
                 <div class="admin-form">
                     <div class="form-group">
                         <label for="site-title">Website titel</label>
-                        <input type="text" id="site-title" placeholder="Mijn website" value="Mijn website">
+                        <input type="text" id="site-title" placeholder="Mijn website" value="Mijn website" oninput="updatePreview()">
                     </div>
                     <div class="form-group">
                         <label for="site-description">Beschrijving</label>
-                        <textarea id="site-description" rows="2" placeholder="Korte beschrijving">Mijn nieuwe website gemaakt met SimpleSite</textarea>
+                        <textarea id="site-description" rows="2" placeholder="Korte beschrijving" oninput="updatePreview()">Mijn nieuwe website gemaakt met SimpleSite</textarea>
                     </div>
-                    <button class="btn-save" id="save-general">Opslaan</button>
                 </div>
             </section>
 
@@ -62,106 +61,103 @@
                         <div class="page-item" data-page="home">
                             <span>🏠 Home</span>
                             <span style="color:#6b7280;font-size:0.85rem;">index.html</span>
-                            <button class="btn-delete-page" data-page="home" style="display:none;">✕</button>
                         </div>
                     </div>
                 </div>
             </section>
 
-            <!-- Inhoud -->
+            <!-- Inhoud - WYSIWYG -->
             <section id="section-content" class="admin-section">
-                <h1>Inhoud bewerken</h1>
-                <p style="color:#6b7280; margin-bottom:1.5rem;">Bewerk de tekst van je pagina's</p>
+                <h1>✏️ Inhoud bewerken</h1>
+                <p style="color:#6b7280; margin-bottom:1.5rem;">Bewerk de tekst en zie direct het resultaat in de preview</p>
                 <div class="admin-form">
                     <div class="form-group">
                         <label for="page-select">Selecteer pagina</label>
-                        <select id="page-select">
+                        <select id="page-select" onchange="loadPageContent(this.value); updatePreview();">
                             <option value="home">Home</option>
                         </select>
                     </div>
                     <div class="form-group">
                         <label for="page-title">Pagina titel</label>
-                        <input type="text" id="page-title" value="Welkom bij mijn website">
+                        <input type="text" id="page-title" value="Welkom bij mijn website" oninput="updatePreview(); autoSave();">
                     </div>
                     <div class="form-group">
                         <label for="page-content">Inhoud</label>
-                        <textarea id="page-content" rows="6">Dit is de inhoud van mijn website. Hier kan ik alles vertellen over mijn bedrijf, projecten of ideeën.</textarea>
+                        <textarea id="page-content" rows="6" oninput="updatePreview(); autoSave();">Dit is de inhoud van mijn website. Hier kan ik alles vertellen over mijn bedrijf, projecten of ideeën.</textarea>
                     </div>
-                    <button class="btn-save" id="save-content">Opslaan</button>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="show-editor" checked onchange="toggleEditorMode()"> 
+                            Toon editor in preview
+                        </label>
+                    </div>
                 </div>
             </section>
 
-            <!-- Design -->
+            <!-- Design - Real-time -->
             <section id="section-design" class="admin-section">
-                <h1>Design</h1>
-                <p style="color:#6b7280; margin-bottom:1.5rem;">Pas de kleuren van je website aan</p>
+                <h1>🎨 Design</h1>
+                <p style="color:#6b7280; margin-bottom:1.5rem;">Pas kleuren aan en zie direct het resultaat</p>
                 <div class="admin-form">
                     <div class="form-group">
                         <label for="primary-color">Hoofdkleur</label>
-                        <input type="color" id="primary-color" value="#2563eb">
-                        <input type="text" id="primary-color-hex" value="#2563eb" style="margin-top:0.5rem;width:120px;padding:0.4rem;border:1px solid #e0e0e0;border-radius:4px;font-family:monospace;">
+                        <div style="display:flex;gap:1rem;align-items:center;">
+                            <input type="color" id="primary-color" value="#2563eb" oninput="updateColor(this); updatePreview();">
+                            <input type="text" id="primary-color-hex" value="#2563eb" style="width:120px;padding:0.4rem;border:1px solid #e0e0e0;border-radius:4px;font-family:monospace;" oninput="updateColorFromHex(this); updatePreview();">
+                        </div>
                     </div>
                     <div class="form-group">
                         <label for="bg-color">Achtergrondkleur</label>
-                        <input type="color" id="bg-color" value="#ffffff">
-                        <input type="text" id="bg-color-hex" value="#ffffff" style="margin-top:0.5rem;width:120px;padding:0.4rem;border:1px solid #e0e0e0;border-radius:4px;font-family:monospace;">
+                        <div style="display:flex;gap:1rem;align-items:center;">
+                            <input type="color" id="bg-color" value="#ffffff" oninput="updateColor(this); updatePreview();">
+                            <input type="text" id="bg-color-hex" value="#ffffff" style="width:120px;padding:0.4rem;border:1px solid #e0e0e0;border-radius:4px;font-family:monospace;" oninput="updateColorFromHex(this); updatePreview();">
+                        </div>
                     </div>
                     <div class="form-group">
                         <label for="text-color">Tekstkleur</label>
-                        <input type="color" id="text-color" value="#1a1a1a">
-                        <input type="text" id="text-color-hex" value="#1a1a1a" style="margin-top:0.5rem;width:120px;padding:0.4rem;border:1px solid #e0e0e0;border-radius:4px;font-family:monospace;">
+                        <div style="display:flex;gap:1rem;align-items:center;">
+                            <input type="color" id="text-color" value="#1a1a1a" oninput="updateColor(this); updatePreview();">
+                            <input type="text" id="text-color-hex" value="#1a1a1a" style="width:120px;padding:0.4rem;border:1px solid #e0e0e0;border-radius:4px;font-family:monospace;" oninput="updateColorFromHex(this); updatePreview();">
+                        </div>
                     </div>
-                    <button class="btn-save" id="save-design">Opslaan</button>
+                    <div style="margin-top:1rem;padding:1rem;background:#f8f9fa;border-radius:6px;font-size:0.9rem;color:#6b7280;">
+                        💡 Kleuren worden direct toegepast in de preview
+                    </div>
                 </div>
             </section>
 
-            <!-- PREVIEW SECTIE -->
+            <!-- PREVIEW SECTIE - Split view -->
             <section id="section-preview" class="admin-section">
-                <h1>👁️ Preview</h1>
-                <p style="color:#6b7280; margin-bottom:1.5rem;">Bekijk je website zoals hij eruit komt te zien</p>
+                <h1>👁️ Live Preview</h1>
+                <p style="color:#6b7280; margin-bottom:1.5rem;">Bekijk je website in real-time terwijl je bewerkt</p>
                 
                 <div class="preview-controls">
-                    <button class="btn-preview" id="preview-mobile">📱 Mobiel</button>
-                    <button class="btn-preview active" id="preview-desktop">💻 Desktop</button>
-                    <button class="btn-preview" id="preview-tablet">📟 Tablet</button>
-                    <button class="btn-refresh" id="refresh-preview">🔄 Vernieuwen</button>
+                    <button class="btn-preview" id="preview-mobile" onclick="setDevice('mobile')">📱 Mobiel</button>
+                    <button class="btn-preview active" id="preview-desktop" onclick="setDevice('desktop')">💻 Desktop</button>
+                    <button class="btn-preview" id="preview-tablet" onclick="setDevice('tablet')">📟 Tablet</button>
+                    <button class="btn-preview" id="preview-split" onclick="toggleSplitView()">📐 Split view</button>
+                    <button class="btn-refresh" onclick="refreshPreview()">🔄 Vernieuwen</button>
                 </div>
 
                 <div class="preview-container" id="preview-container">
                     <div class="preview-frame" id="preview-frame">
                         <div class="preview-content">
-                            <!-- Dit wordt dynamisch gevuld -->
                             <div id="preview-site">
-                                <div class="preview-header" style="background:#ffffff;border-bottom:1px solid #f0f0f0;padding:1rem 2rem;display:flex;justify-content:space-between;align-items:center;">
-                                    <div style="font-size:1.4rem;font-weight:700;">
-                                        <span style="color:#1a1a1a;">Simple</span><span style="color:#2563eb;">Site</span>
-                                    </div>
-                                    <div style="display:flex;gap:1.5rem;">
-                                        <span style="color:#4a4a4a;">Home</span>
-                                        <span style="color:#4a4a4a;">Over ons</span>
-                                        <span style="color:#4a4a4a;">Contact</span>
-                                    </div>
-                                </div>
-                                <div class="preview-hero" style="text-align:center;padding:4rem 2rem;background:#ffffff;">
-                                    <h1 style="font-size:2.5rem;color:#1a1a1a;margin-bottom:1rem;" id="preview-hero-title">Welkom bij mijn website</h1>
-                                    <p style="color:#6b7280;max-width:500px;margin:0 auto;" id="preview-hero-text">Dit is de inhoud van mijn website. Hier kan ik alles vertellen over mijn bedrijf, projecten of ideeën.</p>
-                                </div>
-                                <div class="preview-footer" style="background:#fafafa;border-top:1px solid #f0f0f0;padding:2rem;text-align:center;color:#6b7280;">
-                                    © 2026 SimpleSite
-                                </div>
+                                <!-- Wordt dynamisch gevuld -->
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="preview-tips">
-                    <p>💡 Tip: Wijzig de inhoud of kleuren en klik op "Opslaan" om de preview te updaten.</p>
+                <div class="preview-status" id="preview-status">
+                    <span>✅ Live preview actief</span>
+                    <span id="preview-timestamp"></span>
                 </div>
             </section>
 
             <!-- Download -->
             <section id="section-download" class="admin-section">
-                <h1>Download</h1>
+                <h1>📥 Download</h1>
                 <p style="color:#6b7280; margin-bottom:1.5rem;">Download je complete website</p>
                 <div class="download-box">
                     <p style="margin-bottom:1rem;">Je website is klaar om te downloaden</p>
