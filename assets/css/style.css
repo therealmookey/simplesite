@@ -1151,3 +1151,72 @@ body {
         margin-left: 0;
     }
 }
+/* ===== NAVIGATIE ITEMS ===== */
+.nav-item {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 8px;
+    align-items: center;
+    background: #f7fafc;
+    padding: 8px;
+    border-radius: 8px;
+}
+
+.nav-item .form-control {
+    flex: 1;
+}
+
+/* ===== LAYER SETTINGS MODAL ===== */
+.layer-selector-modal .form-group {
+    margin-bottom: 14px;
+}
+
+.layer-selector-modal .form-group label {
+    font-weight: 600;
+    font-size: 13px;
+    color: #2d3748;
+    display: block;
+    margin-bottom: 4px;
+}
+
+/* ===== LAYER BACKGROUND PREVIEW ===== */
+.layer-render[style*="background"] {
+    transition: background 0.3s;
+}
+
+/* ===== PAGE CANVAS WITH BACKGROUND ===== */
+.page-canvas {
+    transition: background 0.3s;
+    background-size: cover !important;
+    background-position: center !important;
+}
+
+/* ===== NAVIGATION PREVIEW IN EXPORT ===== */
+.site-nav .nav-links a {
+    position: relative;
+}
+
+.site-nav .nav-links a::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: #4f8cf7;
+    transition: width 0.3s;
+}
+
+.site-nav .nav-links a:hover::after {
+    width: 100%;
+}
+
+/* ===== RESPONSIVE NAV ===== */
+@media (max-width: 768px) {
+    .nav-item {
+        flex-wrap: wrap;
+    }
+    .nav-item .form-control {
+        min-width: 100px;
+    }
+}

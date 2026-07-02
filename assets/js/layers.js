@@ -3,18 +3,20 @@
 // =============================================
 
 const LAYER_TYPES = {
-    heading: { icon: 'fa-heading', label: 'Koptekst', default: '<h1>Klik om te bewerken</h1>' },
+    heading: { icon: 'fa-heading', label: 'Koptekst H1', default: '<h1>Klik om te bewerken</h1>' },
     heading2: { icon: 'fa-heading', label: 'Koptekst H2', default: '<h2>Klik om te bewerken</h2>' },
     heading3: { icon: 'fa-heading', label: 'Koptekst H3', default: '<h3>Klik om te bewerken</h3>' },
     text: { icon: 'fa-paragraph', label: 'Tekst', default: '<p>Klik hier om tekst aan te passen.</p>' },
     image: { icon: 'fa-image', label: 'Afbeelding', default: '<div class="upload-placeholder"><i class="fas fa-cloud-upload-alt"></i><br>Klik om afbeelding te uploaden</div>' },
     button: { icon: 'fa-link', label: 'Knop', default: '<a href="#" class="btn-preview">Klik hier</a>' },
     divider: { icon: 'fa-minus', label: 'Scheidingslijn', default: '<hr>' },
-    spacer: { icon: 'fa-arrows-v', label: 'Ruimte', default: '<div class="layer-spacer" style="min-height:40px;"></div>' }
+    spacer: { icon: 'fa-arrows-v', label: 'Ruimte', default: '<div class="layer-spacer"></div>' },
+    // Nieuwe laag types met achtergrond
+    hero: { icon: 'fa-image', label: 'Hero banner', default: '<div style="padding:60px 20px; text-align:center; background:linear-gradient(135deg, #4f8cf7, #6c5ce7); color:white; border-radius:8px;"><h1 style="color:white;">Welkom!</h1><p style="color:white;">Dit is een hero banner</p></div>' },
+    card: { icon: 'fa-square', label: 'Kaart (Card)', default: '<div style="padding:20px; background:white; border-radius:8px; box-shadow:0 4px 12px rgba(0,0,0,0.06);"><h3>Titel</h3><p>Content voor deze kaart</p></div>' }
 };
 
 function initLayers() {
-    // Laag toevoegen knop
     document.getElementById('addLayerBtn').addEventListener('click', function() {
         showLayerTypeSelector();
     });
@@ -23,28 +25,26 @@ function initLayers() {
 function showLayerTypeSelector() {
     const types = Object.keys(LAYER_TYPES);
     let html = `
-        <div class="layer-selector-modal" style="position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:white; padding:30px; border-radius:16px; z-index:1000; min-width:300px; box-shadow:0 20px 60px rgba(0,0,0,0.3);">
-            <h3 style="margin-bottom:16px;">Kies laag type</h3>
+        <div class="layer-selector-modal">
+            <h3><i class="fas fa-plus"></i> Kies laag type</h3>
     `;
     
     types.forEach(type => {
         const info = LAYER_TYPES[type];
         html += `
-            <button onclick="addLayer('${type}'); closeLayerSelector();" 
-                    style="display:flex; align-items:center; gap:10px; width:100%; padding:10px 14px; margin-bottom:6px; border:2px solid #e2e8f0; border-radius:8px; background:white; cursor:pointer; transition:all 0.2s;">
-                <i class="fas ${info.icon}" style="width:20px; color:#4f8cf7;"></i>
+            <button onclick="addLayer('${type}'); closeLayerSelector();" class="layer-option">
+                <i class="fas ${info.icon}"></i>
                 <span>${info.label}</span>
             </button>
         `;
     });
     
     html += `
-            <button onclick="closeLayerSelector()" style="width:100%; margin-top:10px; padding:10px; border:2px solid #e2e8f0; border-radius:8px; background:white; cursor:pointer;">Annuleren</button>
+            <button onclick="closeLayerSelector()" class="layer-option-cancel">Annuleren</button>
         </div>
-        <div id="layerSelectorOverlay" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.3); z-index:999;"></div>
+        <div id="layerSelectorOverlay" onclick="closeLayerSelector()"></div>
     `;
     
-    // Verwijder oude selector als die er is
     const oldSelector = document.querySelector('.layer-selector-modal');
     const oldOverlay = document.getElementById('layerSelectorOverlay');
     if (oldSelector) oldSelector.remove();
@@ -65,7 +65,9 @@ function addLayer(type) {
         type: type,
         content: info.default,
         visible: true,
-        label: `${info.label} ${App.layerIdCounter}`
+        label: `${info.label} ${App.layerIdCounter}`,
+        background: null, // Achtergrond voor deze laag
+        padding: '20px'
     };
     
     if (!App.layers[App.currentPage]) {
@@ -131,13 +133,23 @@ function updateLayerContent(layerId, newContent) {
     const layer = layers.find(l => l.id === layerId);
     if (layer) {
         layer.content = newContent;
-        // Herrender niet om focus te behouden
     }
 }
 
 function renderLayersForPage(page) {
     const container = document.getElementById('layersContainer');
     const layers = App.layers[page] || [];
+    const bg = App.pageBackgrounds[page] || { color: '#f8fafc', image: null };
+    
+    // Update canvas background
+    const canvas = document.getElementById('pageCanvas');
+    if (bg.image) {
+        canvas.style.background = `url(${bg.image}) center/cover no-repeat`;
+        canvas.style.backgroundColor = bg.color || '#f8fafc';
+    } else {
+        canvas.style.background = bg.color || '#f8fafc';
+        canvas.style.backgroundImage = 'none';
+    }
     
     if (layers.length === 0) {
         container.innerHTML = `
@@ -157,8 +169,17 @@ function renderLayersForPage(page) {
         const isImage = layer.type === 'image';
         const content = isImage ? layer.content : layer.content;
         
+        // Bouw layer style met eventuele achtergrond
+        let layerStyle = '';
+        if (layer.background) {
+            layerStyle = `background: ${layer.background};`;
+        }
+        if (layer.padding) {
+            layerStyle += ` padding: ${layer.padding};`;
+        }
+        
         html += `
-            <div class="layer-render layer-${layer.type}" data-id="${layer.id}">
+            <div class="layer-render layer-${layer.type}" data-id="${layer.id}" style="${layerStyle}">
                 <div class="layer-edit-tools">
                     <button onclick="moveLayer(${layer.id}, 'up')" ${index === 0 ? 'disabled style="opacity:0.3"' : ''}>
                         <i class="fas fa-arrow-up"></i>
@@ -168,6 +189,9 @@ function renderLayersForPage(page) {
                     </button>
                     <button onclick="duplicateLayer(${layer.id})">
                         <i class="fas fa-copy"></i>
+                    </button>
+                    <button onclick="showLayerSettings(${layer.id})" title="Laag instellingen">
+                        <i class="fas fa-cog"></i>
                     </button>
                     <button onclick="deleteLayer(${layer.id})" style="color:#fc8181;">
                         <i class="fas fa-trash"></i>
@@ -247,4 +271,70 @@ function updateLayersList() {
     });
     
     list.innerHTML = html;
+}
+
+// ===== LAYER SETTINGS =====
+function showLayerSettings(layerId) {
+    const layers = App.layers[App.currentPage];
+    const layer = layers.find(l => l.id === layerId);
+    if (!layer) return;
+    
+    const currentBg = layer.background || '';
+    const currentPadding = layer.padding || '20px';
+    
+    const html = `
+        <div class="layer-selector-modal" style="min-width:350px;">
+            <h3><i class="fas fa-cog"></i> Laag instellingen</h3>
+            <div class="form-group">
+                <label>Laag naam</label>
+                <input type="text" id="layerNameInput" value="${layer.label}" class="form-control">
+            </div>
+            <div class="form-group">
+                <label>Achtergrond (kleur of gradient)</label>
+                <input type="text" id="layerBgInput" value="${currentBg}" placeholder="Bijv. #4f8cf7 of linear-gradient(...)" class="form-control">
+                <div style="display:flex; gap:8px; margin-top:6px;">
+                    <input type="color" value="${currentBg.match(/#[0-9a-f]{6}/i)?.[0] || '#ffffff'}" 
+                           onchange="document.getElementById('layerBgInput').value = this.value;" 
+                           style="width:40px; height:40px; border:2px solid #e2e8f0; border-radius:8px; cursor:pointer;">
+                    <span style="font-size:12px; color:#a0aec0; display:flex; align-items:center;">Kies kleur</span>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Padding</label>
+                <input type="text" id="layerPaddingInput" value="${currentPadding}" placeholder="Bijv. 20px 30px" class="form-control">
+            </div>
+            <div style="display:flex; gap:10px; margin-top:16px;">
+                <button class="btn btn-primary" onclick="saveLayerSettings(${layerId})">
+                    <i class="fas fa-save"></i> Opslaan
+                </button>
+                <button class="btn btn-outline" onclick="closeLayerSelector()">Annuleren</button>
+            </div>
+        </div>
+        <div id="layerSelectorOverlay" onclick="closeLayerSelector()"></div>
+    `;
+    
+    const oldSelector = document.querySelector('.layer-selector-modal');
+    const oldOverlay = document.getElementById('layerSelectorOverlay');
+    if (oldSelector) oldSelector.remove();
+    if (oldOverlay) oldOverlay.remove();
+    
+    document.body.insertAdjacentHTML('beforeend', html);
+}
+
+function saveLayerSettings(layerId) {
+    const layers = App.layers[App.currentPage];
+    const layer = layers.find(l => l.id === layerId);
+    if (!layer) return;
+    
+    const nameInput = document.getElementById('layerNameInput');
+    const bgInput = document.getElementById('layerBgInput');
+    const paddingInput = document.getElementById('layerPaddingInput');
+    
+    if (nameInput) layer.label = nameInput.value;
+    if (bgInput) layer.background = bgInput.value;
+    if (paddingInput) layer.padding = paddingInput.value;
+    
+    closeLayerSelector();
+    renderLayersForPage(App.currentPage);
+    updateLayersList();
 }

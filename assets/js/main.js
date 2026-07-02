@@ -16,7 +16,20 @@ const App = {
     currentStep: 1,
     currentPage: 'home',
     layerIdCounter: 0,
-    selectedLayerId: null
+    selectedLayerId: null,
+    
+    // Navigatie instellingen
+    navItems: [
+        { label: 'Home', link: '#home' },
+        { label: 'Over ons', link: '#over' },
+        { label: 'Contact', link: '#contact' }
+    ],
+    navStyle: 'horizontal',
+    navBgColor: '#ffffff',
+    navBgImage: null,
+    
+    // Pagina achtergronden
+    pageBackgrounds: {}
 };
 
 // ===== INCLUDES LADEN =====
@@ -58,4 +71,5 @@ document.addEventListener('DOMContentLoaded', function() {
     initWizard();
     initLayers();
     initPayment();
+    initNavItems();
 });
