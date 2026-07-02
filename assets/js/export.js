@@ -17,59 +17,102 @@ function generatePreview() {
         return;
     }
     
-    let html = '<div style="background:white; border-radius:12px; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,0.06);">';
+    // Huidige pagina voor preview bepalen
+    const currentPage = App.currentPage || 'index';
     
-    // Navigatie balk
-    html += generateNavHTML();
+    let html = `
+        <div style="background:white; border-radius:12px; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+            <div style="padding:15px 30px; background:${App.navBgColor || '#ffffff'}; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:15px; border-bottom:2px solid #e2e8f0; ${App.navBgImage ? `background-image: url(${App.navBgImage}); background-size: cover; background-position: center;` : ''}">
+                <div style="font-size:24px; font-weight:800; color:#2d3748;">
+                    ${App.logo ? `<img src="${App.logo}" style="max-height:40px;">` : (App.siteTitle || 'Mijn Website')}
+                </div>
+                <div style="display:flex; gap:20px; flex-wrap:wrap;">
+    `;
     
-    // Content per pagina
-    html += '<div style="padding:30px;">';
-    
+    // Navigatie links - deze moeten binnen de preview blijven werken
     App.navItems.forEach(item => {
-        const pageName = item.filename;
-        const layers = App.layers[pageName] || [];
-        const bg = App.pageBackgrounds?.[pageName] || { color: '#f8fafc', image: null };
-        
-        let bgStyle = `background: ${bg.color};`;
-        if (bg.image) {
-            bgStyle += ` background-image: url(${bg.image}); background-size: cover; background-position: center;`;
-        }
-        
-        let pageHTML = renderLayersForExport(layers);
-        
+        const isActive = item.filename === currentPage;
         html += `
-            <div style="${bgStyle} padding:20px; border-radius:12px; margin-bottom:20px; border:1px solid #e2e8f0;">
-                <h3 style="color:#2d3748; border-bottom:3px solid ${App.primaryColor || '#4f8cf7'}; padding-bottom:8px; margin-bottom:15px;">
-                    ${item.label} <span style="font-size:12px; color:#a0aec0; font-weight:400;">(${item.filename}.html)</span>
-                </h3>
-                ${pageHTML || '<p style="color:#a0aec0;">Geen content op deze pagina</p>'}
-            </div>
+            <a href="#" onclick="showPreviewPage('${item.filename}'); return false;" 
+               style="color:${isActive ? App.primaryColor : '#4a5568'}; text-decoration:none; font-weight:${isActive ? '700' : '500'}; cursor:pointer;">
+                ${item.label}
+            </a>
         `;
     });
     
-    html += '</div></div>';
+    html += `
+                </div>
+            </div>
+            <div style="padding:30px;" id="previewContent">
+    `;
+    
+    // Toon de huidige pagina
+    html += generatePageContent(currentPage);
+    
+    html += `
+            </div>
+        </div>
+    `;
+    
     container.innerHTML = html;
+    
+    // Voeg de preview navigatie functie toe aan het window object
+    window.showPreviewPage = function(filename) {
+        const contentContainer = document.getElementById('previewContent');
+        if (contentContainer) {
+            contentContainer.innerHTML = generatePageContent(filename);
+        }
+        
+        // Update actieve link in navigatie
+        const links = document.querySelectorAll('#websitePreview .site-nav-links a');
+        links.forEach(link => {
+            const linkFilename = link.getAttribute('data-filename');
+            if (linkFilename === filename) {
+                link.style.color = App.primaryColor || '#4f8cf7';
+                link.style.fontWeight = '700';
+            } else {
+                link.style.color = '#4a5568';
+                link.style.fontWeight = '500';
+            }
+        });
+        
+        // Update de titel
+        const navItem = App.navItems.find(item => item.filename === filename);
+        if (navItem) {
+            document.querySelector('#websitePreview .page-title')?.remove();
+            const titleEl = document.createElement('div');
+            titleEl.className = 'page-title';
+            titleEl.style.cssText = 'font-size:24px; font-weight:700; color:#2d3748; margin-bottom:20px; border-bottom:3px solid ' + (App.primaryColor || '#4f8cf7') + '; padding-bottom:12px;';
+            titleEl.textContent = navItem.label;
+            const contentContainer = document.getElementById('previewContent');
+            if (contentContainer) {
+                contentContainer.prepend(titleEl);
+            }
+        }
+    };
 }
 
-function generateNavHTML() {
-    let navHTML = '';
-    App.navItems.forEach(item => {
-        navHTML += `<a href="${item.filename}.html" style="color:${App.primaryColor}; text-decoration:none; font-weight:500;">${item.label}</a>`;
-    });
+function generatePageContent(filename) {
+    const layers = App.layers[filename] || [];
+    const bg = App.pageBackgrounds?.[filename] || { color: '#f8fafc', image: null };
     
-    let navBgStyle = 'background: ' + (App.navBgColor || '#ffffff') + ';';
-    if (App.navBgImage) {
-        navBgStyle += ` background-image: url(${App.navBgImage}); background-size: cover; background-position: center;`;
+    let bgStyle = `background: ${bg.color};`;
+    if (bg.image) {
+        bgStyle += ` background-image: url(${bg.image}); background-size: cover; background-position: center;`;
     }
     
+    let pageHTML = renderLayersForExport(layers);
+    
+    // Zoek de bijbehorende label
+    const navItem = App.navItems.find(item => item.filename === filename);
+    const label = navItem ? navItem.label : filename;
+    
     return `
-        <div style="padding:15px 30px; ${navBgStyle} display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:15px; border-bottom:2px solid #e2e8f0;">
-            <div style="font-size:24px; font-weight:800; color:#2d3748;">
-                ${App.logo ? `<img src="${App.logo}" style="max-height:40px;">` : (App.siteTitle || 'Mijn Website')}
+        <div style="${bgStyle} padding:20px; border-radius:12px; border:1px solid #e2e8f0;">
+            <div class="page-title" style="font-size:24px; font-weight:700; color:#2d3748; margin-bottom:20px; border-bottom:3px solid ${App.primaryColor || '#4f8cf7'}; padding-bottom:12px;">
+                ${label}
             </div>
-            <div style="display:flex; gap:20px; flex-wrap:wrap;">
-                ${navHTML}
-            </div>
+            ${pageHTML || '<p style="color:#a0aec0;">Geen content op deze pagina</p>'}
         </div>
     `;
 }
@@ -104,7 +147,6 @@ function generateAndDownload() {
     // Zorg dat Home (index) de eerste is
     const homeIndex = App.navItems.findIndex(item => item.filename === 'index');
     if (homeIndex > 0) {
-        // Verplaats index naar eerste positie
         const home = App.navItems.splice(homeIndex, 1)[0];
         App.navItems.unshift(home);
     }
@@ -316,3 +358,5 @@ Gemaakt met SimpleSite
 window.generatePreview = generatePreview;
 window.generateAndDownload = generateAndDownload;
 window.renderLayersForExport = renderLayersForExport;
+window.generatePageContent = generatePageContent;
+window.showPreviewPage = showPreviewPage;
