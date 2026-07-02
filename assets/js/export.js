@@ -19,7 +19,7 @@ function generatePreview() {
     
     let html = '<div style="background:white; border-radius:12px; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,0.06);">';
     
-    // Navigatie balk (alleen de navigatie, geen content eronder)
+    // Navigatie balk
     html += generateNavHTML();
     
     // Content per pagina
@@ -40,7 +40,7 @@ function generatePreview() {
         html += `
             <div style="${bgStyle} padding:20px; border-radius:12px; margin-bottom:20px; border:1px solid #e2e8f0;">
                 <h3 style="color:#2d3748; border-bottom:3px solid ${App.primaryColor || '#4f8cf7'}; padding-bottom:8px; margin-bottom:15px;">
-                    ${item.label}
+                    ${item.label} <span style="font-size:12px; color:#a0aec0; font-weight:400;">(${item.filename}.html)</span>
                 </h3>
                 ${pageHTML || '<p style="color:#a0aec0;">Geen content op deze pagina</p>'}
             </div>
@@ -79,7 +79,6 @@ function renderLayersForExport(layers) {
     layers.forEach(layer => {
         if (!layer.visible) return;
         
-        const info = LAYER_TYPES[layer.type] || { icon: 'fa-cube', label: 'Laag' };
         let contentHTML = layer.content || '';
         
         // Image placeholder vervangen
@@ -102,12 +101,20 @@ function generateAndDownload() {
         return;
     }
     
+    // Zorg dat Home (index) de eerste is
+    const homeIndex = App.navItems.findIndex(item => item.filename === 'index');
+    if (homeIndex > 0) {
+        // Verplaats index naar eerste positie
+        const home = App.navItems.splice(homeIndex, 1)[0];
+        App.navItems.unshift(home);
+    }
+    
     const color = App.primaryColor || '#4f8cf7';
     const siteTitle = App.siteTitle || 'Mijn Website';
     const zip = new JSZip();
     
     // Genereer voor elke pagina een apart HTML bestand
-    App.navItems.forEach((item, index) => {
+    App.navItems.forEach((item) => {
         const pageName = item.filename;
         const layers = App.layers[pageName] || [];
         const bg = App.pageBackgrounds?.[pageName] || { color: '#f8fafc', image: null };
@@ -136,7 +143,7 @@ function generateAndDownload() {
         // Content voor deze pagina
         let contentHTML = renderLayersForExport(layers);
         
-        const filename = index === 0 ? 'index.html' : pageName + '.html';
+        const filename = pageName + '.html';
         
         const pageHTML = `<!DOCTYPE html>
 <html lang="nl">

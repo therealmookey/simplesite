@@ -90,54 +90,54 @@
                     </div>
                 </div>
 
-                <!-- Stap 2: Navigatie -->
-                <div class="wizard-step-content" id="step2" style="display:none;">
-                    <h2><i class="fas fa-bars"></i> Navigatie menu</h2>
-                    <p class="step-description">Voeg pagina's toe aan het navigatiemenu. Deze worden aparte HTML pagina's.</p>
-                    
-                    <div class="form-group">
-                        <label>Navigatie stijl</label>
-                        <select id="navStyle" class="form-control">
-                            <option value="horizontal">Horizontaal (standaard)</option>
-                            <option value="vertical">Verticaal (zijkant)</option>
-                            <option value="hamburger">Hamburger menu (mobiel)</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>Navigatie items (pagina's)</label>
-                        <div id="navItemsContainer">
-                            <p style="color:#a0aec0; font-size:13px;">Nog geen pagina's. Voeg ze hieronder toe.</p>
-                        </div>
-                        <div style="display:flex; gap:10px; margin-top:10px; flex-wrap:wrap;">
-                            <input type="text" id="newNavItemLabel" placeholder="Bijv. Home" class="form-control" style="flex:1; min-width:150px;">
-                            <input type="text" id="newNavItemLink" placeholder="Bestandsnaam (bijv. index)" class="form-control" style="flex:1; min-width:150px;" value="index">
-                            <button class="btn btn-primary" id="addNavItemBtn">
-                                <i class="fas fa-plus"></i> Toevoegen
-                            </button>
-                        </div>
-                        <p style="font-size:12px; color:#a0aec0; margin-top:6px;">
-                            <i class="fas fa-info-circle"></i> 
-                            Tip: Voer een bestandsnaam in zonder .html, bijv. "index" voor index.html
-                        </p>
-                    </div>
+                <!-- Stap 2: Navigatie (alleen dit deel wijzigt) -->
+<div class="wizard-step-content" id="step2" style="display:none;">
+    <h2><i class="fas fa-bars"></i> Navigatie menu</h2>
+    <p class="step-description">Voeg pagina's toe aan het navigatiemenu. Deze worden aparte HTML pagina's.</p>
+    
+    <div class="form-group">
+        <label>Navigatie stijl</label>
+        <select id="navStyle" class="form-control">
+            <option value="horizontal">Horizontaal (standaard)</option>
+            <option value="vertical">Verticaal (zijkant)</option>
+            <option value="hamburger">Hamburger menu (mobiel)</option>
+        </select>
+    </div>
+    
+    <div class="form-group">
+        <label>Navigatie items (pagina's)</label>
+        <div id="navItemsContainer">
+            <!-- Wordt gevuld met standaard Home -->
+        </div>
+        <div style="display:flex; gap:10px; margin-top:10px; flex-wrap:wrap;">
+            <input type="text" id="newNavItemLabel" placeholder="Bijv. Over ons" class="form-control" style="flex:1; min-width:150px;">
+            <input type="text" id="newNavItemLink" placeholder="Bestandsnaam (optioneel)" class="form-control" style="flex:1; min-width:150px;">
+            <button class="btn btn-primary" id="addNavItemBtn">
+                <i class="fas fa-plus"></i> Toevoegen
+            </button>
+        </div>
+        <p style="font-size:12px; color:#a0aec0; margin-top:6px;">
+            <i class="fas fa-info-circle"></i> 
+            Laat bestandsnaam leeg voor automatische naam (bijv. "over-ons")
+        </p>
+    </div>
 
-                    <div class="form-group">
-                        <label>Navigatie achtergrond</label>
-                        <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
-                            <input type="color" id="navBgColor" value="#ffffff" class="form-control" style="width:60px; padding:2px; height:40px;">
-                            <span>Kleur</span>
-                            <input type="file" id="navBgImage" accept="image/*" class="form-control" style="flex:1; padding:8px;">
-                            <span style="font-size:13px; color:#a0aec0;">of afbeelding</span>
-                        </div>
-                        <div id="navBgPreview" style="margin-top:8px;"></div>
-                    </div>
-                    
-                    <div style="margin-top:20px; display:flex; gap:10px; justify-content:space-between;">
-                        <button class="btn btn-outline prev-step">← Vorige</button>
-                        <button class="btn btn-primary next-step">Volgende stap →</button>
-                    </div>
-                </div>
+    <div class="form-group">
+        <label>Navigatie achtergrond</label>
+        <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+            <input type="color" id="navBgColor" value="#ffffff" class="form-control" style="width:60px; padding:2px; height:40px;">
+            <span>Kleur</span>
+            <input type="file" id="navBgImage" accept="image/*" class="form-control" style="flex:1; padding:8px;">
+            <span style="font-size:13px; color:#a0aec0;">of afbeelding</span>
+        </div>
+        <div id="navBgPreview" style="margin-top:8px;"></div>
+    </div>
+    
+    <div style="margin-top:20px; display:flex; gap:10px; justify-content:space-between;">
+        <button class="btn btn-outline prev-step">← Vorige</button>
+        <button class="btn btn-primary next-step">Volgende stap →</button>
+    </div>
+</div>
 
                 <!-- Stap 3: Lagen (TERUG NAAR DE OUDE STIJL) -->
                 <div class="wizard-step-content" id="step3" style="display:none;">

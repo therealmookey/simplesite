@@ -7,15 +7,31 @@ function initWizard() {
     const nextBtns = document.querySelectorAll('.next-step');
     const prevBtns = document.querySelectorAll('.prev-step');
 
-    // Initialize state - ALLES LEEG
+    // Initialize state
     if (!App.navItems) {
-        App.navItems = [];
+        // Standaard "Home" pagina
+        App.navItems = [
+            { label: 'Home', filename: 'index', link: 'index.html' }
+        ];
     }
     if (!App.pageBackgrounds) {
         App.pageBackgrounds = {};
     }
     if (!App.layers) {
         App.layers = {};
+    }
+
+    // Zorg dat Home in layers zit
+    if (!App.layers['index']) {
+        App.layers['index'] = [];
+    }
+    if (!App.pageBackgrounds['index']) {
+        App.pageBackgrounds['index'] = { color: '#f8fafc', image: null };
+    }
+    
+    // Zet current page op index
+    if (!App.currentPage) {
+        App.currentPage = 'index';
     }
 
     steps.forEach(step => {
@@ -80,41 +96,46 @@ function initWizard() {
 
     document.getElementById('addNavItemBtn').addEventListener('click', function() {
         const label = document.getElementById('newNavItemLabel').value.trim();
-        const filename = document.getElementById('newNavItemLink').value.trim();
+        let filename = document.getElementById('newNavItemLink').value.trim();
         
         if (!label) {
             alert('Voer een label in voor het menu item!');
             return;
         }
+        
+        // Automatische bestandsnaam genereren als er geen is ingevuld
         if (!filename) {
-            alert('Voer een bestandsnaam in (bijv. index)');
-            return;
+            filename = label.toLowerCase()
+                .replace(/[^a-z0-9\s-]/g, '')  // verwijder speciale tekens
+                .replace(/\s+/g, '-')           // spaties → streepjes
+                .replace(/-+/g, '-');           // dubbele streepjes → enkel
+        } else {
+            // Maak de ingevulde bestandsnaam veilig
+            filename = filename.toLowerCase().replace(/[^a-z0-9-]/g, '');
         }
         
-        // Maak de bestandsnaam veilig
-        const safeFilename = filename.toLowerCase().replace(/[^a-z0-9-]/g, '');
-        if (!safeFilename) {
+        if (!filename) {
             alert('Ongeldige bestandsnaam. Gebruik alleen letters, cijfers en streepjes.');
             return;
         }
         
         // Check of bestandsnaam al bestaat
-        if (App.navItems.some(item => item.filename === safeFilename)) {
+        if (App.navItems.some(item => item.filename === filename)) {
             alert('Deze bestandsnaam bestaat al!');
             return;
         }
         
         App.navItems.push({ 
             label: label, 
-            filename: safeFilename,
-            link: safeFilename + '.html'
+            filename: filename,
+            link: filename + '.html'
         });
         
-        if (!App.layers[safeFilename]) {
-            App.layers[safeFilename] = [];
+        if (!App.layers[filename]) {
+            App.layers[filename] = [];
         }
-        if (!App.pageBackgrounds[safeFilename]) {
-            App.pageBackgrounds[safeFilename] = { color: '#f8fafc', image: null };
+        if (!App.pageBackgrounds[filename]) {
+            App.pageBackgrounds[filename] = { color: '#f8fafc', image: null };
         }
         
         document.getElementById('newNavItemLabel').value = '';
@@ -123,7 +144,7 @@ function initWizard() {
         updatePageSelector();
         
         if (!App.currentPage || !App.navItems.some(item => item.filename === App.currentPage)) {
-            App.currentPage = safeFilename;
+            App.currentPage = filename;
             updatePageSelector();
             if (typeof renderLayers === 'function') {
                 renderLayers();
@@ -292,11 +313,12 @@ function renderNavItems() {
     
     let html = '<div style="display:flex; flex-direction:column; gap:4px;">';
     App.navItems.forEach((item, index) => {
+        const isHome = item.filename === 'index';
         html += `
             <div style="display:flex; gap:10px; align-items:center; padding:8px 12px; background:#f7fafc; border-radius:6px; border:1px solid #e2e8f0;">
                 <i class="fas fa-file" style="color:#4f8cf7; width:16px;"></i>
                 <span style="flex:1; font-weight:500;">${item.label}</span>
-                <span style="color:#a0aec0; font-size:13px;">${item.filename}.html</span>
+                <span style="color:#a0aec0; font-size:13px;">${item.filename}.html ${isHome ? '🏠' : ''}</span>
                 <button onclick="removeNavItem(${index})" style="background:none; border:none; color:#fc8181; cursor:pointer; padding:4px 8px; border-radius:4px;">
                     <i class="fas fa-times"></i>
                 </button>
@@ -310,6 +332,13 @@ function renderNavItems() {
 function removeNavItem(index) {
     const item = App.navItems[index];
     if (!item) return;
+    
+    // Home (index) mag niet verwijderd worden
+    if (item.filename === 'index') {
+        alert('De homepage (index) kan niet verwijderd worden!');
+        return;
+    }
+    
     if (!confirm(`Verwijder "${item.label}" uit de navigatie?`)) return;
     
     App.navItems.splice(index, 1);
@@ -318,7 +347,7 @@ function removeNavItem(index) {
     delete App.pageBackgrounds[pageName];
     
     if (App.currentPage === pageName) {
-        App.currentPage = App.navItems.length > 0 ? App.navItems[0].filename : null;
+        App.currentPage = 'index';
     }
     
     renderNavItems();
@@ -344,7 +373,8 @@ function updatePageSelector() {
     App.navItems.forEach(item => {
         const option = document.createElement('option');
         option.value = item.filename;
-        option.textContent = item.label + ' (' + item.filename + '.html)';
+        const isHome = item.filename === 'index';
+        option.textContent = item.label + ' (' + item.filename + '.html)' + (isHome ? ' 🏠' : '');
         if (item.filename === App.currentPage) {
             option.selected = true;
         }
