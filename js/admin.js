@@ -550,4 +550,4 @@ function initSettings() {
     
     loadPageContent('home');
     setTimeout(updatePreview, 200);
-}
+}}
