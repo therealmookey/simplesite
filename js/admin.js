@@ -8,45 +8,35 @@ let autoSaveTimer = null;
 let previewUpdateTimeout = null;
 
 // ========================================
-// 1. NAVIGATIE - EERST INITIALISEREN
+// 1. NAVIGATIE - SIMPELE VERSIE DIE WERKT
 // ========================================
-function initNavigation() {
-    console.log('🔍 Navigatie initialiseren...');
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🚀 SimpleSite Builder start...');
     
+    // Alle navigatie links
     const navLinks = document.querySelectorAll('.admin-nav a');
     const sections = document.querySelectorAll('.admin-section');
     
     console.log(`📊 Gevonden: ${navLinks.length} navigatie links, ${sections.length} secties`);
     
-    // Verwijder eventuele bestaande event listeners door ze te clonen
+    // Voor elke link
     navLinks.forEach(link => {
-        // Vervang de link met een clone om oude listeners te verwijderen
-        const newLink = link.cloneNode(true);
-        link.parentNode.replaceChild(newLink, link);
-    });
-    
-    // Selecteer de nieuwe links
-    const newNavLinks = document.querySelectorAll('.admin-nav a');
-    
-    newNavLinks.forEach((link, index) => {
         link.addEventListener('click', function(e) {
-            e.preventDefault();
+            e.preventDefault(); // Zorgt dat de URL niet verandert
             e.stopPropagation();
             
-            console.log(`🖱️ Geklikt op: ${this.textContent.trim()}`);
+            const sectionId = this.getAttribute('data-section');
+            console.log(`🖱️ Geklikt op: ${this.textContent.trim()} -> sectie: ${sectionId}`);
             
-            // Verwijder active class van alle links
-            newNavLinks.forEach(l => l.classList.remove('active'));
-            // Voeg active toe aan geklikte link
+            // Alle links deactiveer
+            navLinks.forEach(l => l.classList.remove('active'));
+            // Deze link activeren
             this.classList.add('active');
             
-            // Verberg alle secties
+            // Alle secties verbergen
             sections.forEach(s => s.classList.remove('active'));
             
-            // Toon de juiste sectie
-            const sectionId = this.getAttribute('data-section');
-            console.log(`📄 Sectie ID: ${sectionId}`);
-            
+            // De juiste sectie tonen
             const target = document.getElementById(`section-${sectionId}`);
             if (target) {
                 target.classList.add('active');
@@ -55,35 +45,24 @@ function initNavigation() {
                 console.log(`❌ Sectie "${sectionId}" niet gevonden`);
             }
             
-            // Update preview als we naar preview tab gaan
+            // Als we naar preview gaan, update dan de preview
             if (sectionId === 'preview') {
                 setTimeout(updatePreview, 100);
             }
         });
     });
     
-    // Zorg dat de eerste link actief is
-    if (newNavLinks.length > 0) {
-        newNavLinks[0].classList.add('active');
+    // Zorg dat de eerste sectie zichtbaar is
+    const firstLink = document.querySelector('.admin-nav a');
+    if (firstLink) {
+        firstLink.classList.add('active');
         const firstSection = document.getElementById('section-general');
         if (firstSection) {
             firstSection.classList.add('active');
         }
     }
     
-    console.log('✅ Navigatie geïnitialiseerd!');
-}
-
-// ========================================
-// 2. DOCUMENT READY
-// ========================================
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('🚀 SimpleSite Builder start...');
-    
-    // Eerst navigatie initialiseren
-    initNavigation();
-    
-    // Dan de rest
+    // Initialiseer de rest
     initPages();
     initContent();
     initColors();
@@ -95,7 +74,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // ========================================
-// 3. PAGINA'S
+// 2. PAGINA'S
 // ========================================
 function initPages() {
     const addBtn = document.getElementById('add-page');
@@ -150,7 +129,7 @@ function initPages() {
 }
 
 // ========================================
-// 4. PAGINA VERWIJDEREN
+// 3. PAGINA VERWIJDEREN
 // ========================================
 window.deletePage = function(pageId, name) {
     if (!confirm(`Weet je zeker dat je "${name}" wilt verwijderen?`)) return;
@@ -173,7 +152,7 @@ window.deletePage = function(pageId, name) {
 };
 
 // ========================================
-// 5. INHOUD
+// 4. INHOUD
 // ========================================
 function initContent() {
     const select = document.getElementById('page-select');
@@ -218,7 +197,7 @@ window.autoSave = function() {
 };
 
 // ========================================
-// 6. KLEUREN
+// 5. KLEUREN
 // ========================================
 function initColors() {
     const colorInputs = document.querySelectorAll('input[type="color"]');
@@ -267,7 +246,7 @@ function initColors() {
 }
 
 // ========================================
-// 7. PREVIEW
+// 6. PREVIEW
 // ========================================
 function initPreview() {
     // Device knoppen
@@ -451,7 +430,7 @@ function renderPreview() {
 }
 
 // ========================================
-// 8. SETTINGS
+// 7. SETTINGS
 // ========================================
 function getSettings() {
     const saved = localStorage.getItem('simplesite_settings');
@@ -470,7 +449,7 @@ function saveSettings(settings) {
 }
 
 // ========================================
-// 9. DOWNLOAD
+// 8. DOWNLOAD
 // ========================================
 function initDownload() {
     const downloadBtn = document.querySelector('.btn-download');
@@ -482,7 +461,7 @@ function initDownload() {
 }
 
 // ========================================
-// 10. INSTELLINGEN LADEN
+// 9. INSTELLINGEN LADEN
 // ========================================
 function initSettings() {
     const settings = getSettings();
@@ -565,4 +544,3 @@ function initSettings() {
     loadPageContent('home');
     setTimeout(updatePreview, 200);
 }
-// Laatste update: 2026
