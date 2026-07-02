@@ -9,16 +9,14 @@ function initWizard() {
 
     // Initialize state - ALLES LEEG
     if (!App.navItems) {
-        App.navItems = [];  // LEEG - gebruiker voegt zelf toe
+        App.navItems = [];
     }
     if (!App.pageBackgrounds) {
         App.pageBackgrounds = {};
     }
-    if (!pageBlocks) {
-        window.pageBlocks = {};
+    if (!App.layers) {
+        App.layers = {};
     }
-
-    // Geen default pagina's!
 
     steps.forEach(step => {
         step.addEventListener('click', function() {
@@ -82,46 +80,56 @@ function initWizard() {
 
     document.getElementById('addNavItemBtn').addEventListener('click', function() {
         const label = document.getElementById('newNavItemLabel').value.trim();
-        const link = document.getElementById('newNavItemLink').value.trim();
+        const filename = document.getElementById('newNavItemLink').value.trim();
         
         if (!label) {
             alert('Voer een label in voor het menu item!');
             return;
         }
-        if (!link) {
-            alert('Voer een link in (bijv. #diensten)');
+        if (!filename) {
+            alert('Voer een bestandsnaam in (bijv. index)');
             return;
         }
         
-        // Check of link al bestaat
-        if (App.navItems.some(item => item.link === link)) {
-            alert('Deze link bestaat al!');
+        // Maak de bestandsnaam veilig
+        const safeFilename = filename.toLowerCase().replace(/[^a-z0-9-]/g, '');
+        if (!safeFilename) {
+            alert('Ongeldige bestandsnaam. Gebruik alleen letters, cijfers en streepjes.');
             return;
         }
         
-        App.navItems.push({ label, link });
-        const pageName = link.replace('#', '');
-        if (!pageBlocks[pageName]) {
-            pageBlocks[pageName] = [];
+        // Check of bestandsnaam al bestaat
+        if (App.navItems.some(item => item.filename === safeFilename)) {
+            alert('Deze bestandsnaam bestaat al!');
+            return;
         }
-        if (!App.pageBackgrounds[pageName]) {
-            App.pageBackgrounds[pageName] = { color: '#f8fafc', image: null };
+        
+        App.navItems.push({ 
+            label: label, 
+            filename: safeFilename,
+            link: safeFilename + '.html'
+        });
+        
+        if (!App.layers[safeFilename]) {
+            App.layers[safeFilename] = [];
+        }
+        if (!App.pageBackgrounds[safeFilename]) {
+            App.pageBackgrounds[safeFilename] = { color: '#f8fafc', image: null };
         }
         
         document.getElementById('newNavItemLabel').value = '';
-        document.getElementById('newNavItemLink').value = '#';
+        document.getElementById('newNavItemLink').value = '';
         renderNavItems();
         updatePageSelector();
         
-        // Als er nog geen huidige pagina is, selecteer de eerste
-        if (!App.currentPage || !App.navItems.some(item => item.link.replace('#', '') === App.currentPage)) {
-            App.currentPage = pageName;
+        if (!App.currentPage || !App.navItems.some(item => item.filename === App.currentPage)) {
+            App.currentPage = safeFilename;
             updatePageSelector();
-            if (typeof renderBlocks === 'function') {
-                renderBlocks();
+            if (typeof renderLayers === 'function') {
+                renderLayers();
             }
-            if (typeof updateStructureTree === 'function') {
-                updateStructureTree();
+            if (typeof updateLayersList === 'function') {
+                updateLayersList();
             }
         }
     });
@@ -129,25 +137,11 @@ function initWizard() {
     // Page selector change
     document.getElementById('pageSelector').addEventListener('change', function() {
         App.currentPage = this.value;
-        if (typeof renderBlocks === 'function') {
-            renderBlocks();
+        if (typeof renderLayers === 'function') {
+            renderLayers();
         }
-        if (typeof updateStructureTree === 'function') {
-            updateStructureTree();
-        }
-        if (typeof updatePageBackgroundUI === 'function') {
-            updatePageBackgroundUI();
-        }
-    });
-
-    // Refresh page selector
-    document.getElementById('refreshPageSelector').addEventListener('click', function() {
-        updatePageSelector();
-        if (typeof renderBlocks === 'function') {
-            renderBlocks();
-        }
-        if (typeof updateStructureTree === 'function') {
-            updateStructureTree();
+        if (typeof updateLayersList === 'function') {
+            updateLayersList();
         }
         if (typeof updatePageBackgroundUI === 'function') {
             updatePageBackgroundUI();
@@ -263,16 +257,15 @@ function goToStep(step) {
     });
     document.getElementById(`step${step}`).style.display = 'block';
 
-    // Toon/verberg blocks panel
-    document.getElementById('blocksPanel').style.display = step === 3 ? 'block' : 'none';
+    document.getElementById('layersPanel').style.display = step === 3 ? 'block' : 'none';
 
     if (step === 3) {
         updatePageSelector();
-        if (typeof renderBlocks === 'function') {
-            renderBlocks();
+        if (typeof renderLayers === 'function') {
+            renderLayers();
         }
-        if (typeof updateStructureTree === 'function') {
-            updateStructureTree();
+        if (typeof updateLayersList === 'function') {
+            updateLayersList();
         }
         if (typeof updatePageBackgroundUI === 'function') {
             updatePageBackgroundUI();
@@ -288,7 +281,6 @@ function goToStep(step) {
     document.querySelector('.canvas-container').scrollTop = 0;
 }
 
-// ===== NAVIGATIE ITEMS =====
 function renderNavItems() {
     const container = document.getElementById('navItemsContainer');
     if (!container) return;
@@ -302,9 +294,9 @@ function renderNavItems() {
     App.navItems.forEach((item, index) => {
         html += `
             <div style="display:flex; gap:10px; align-items:center; padding:8px 12px; background:#f7fafc; border-radius:6px; border:1px solid #e2e8f0;">
-                <i class="fas fa-link" style="color:#4f8cf7; width:16px;"></i>
+                <i class="fas fa-file" style="color:#4f8cf7; width:16px;"></i>
                 <span style="flex:1; font-weight:500;">${item.label}</span>
-                <span style="color:#a0aec0; font-size:13px;">${item.link}</span>
+                <span style="color:#a0aec0; font-size:13px;">${item.filename}.html</span>
                 <button onclick="removeNavItem(${index})" style="background:none; border:none; color:#fc8181; cursor:pointer; padding:4px 8px; border-radius:4px;">
                     <i class="fas fa-times"></i>
                 </button>
@@ -321,22 +313,21 @@ function removeNavItem(index) {
     if (!confirm(`Verwijder "${item.label}" uit de navigatie?`)) return;
     
     App.navItems.splice(index, 1);
-    const pageName = item.link.replace('#', '');
-    delete pageBlocks[pageName];
+    const pageName = item.filename;
+    delete App.layers[pageName];
     delete App.pageBackgrounds[pageName];
     
-    // Reset current page als die verwijderd is
     if (App.currentPage === pageName) {
-        App.currentPage = App.navItems.length > 0 ? App.navItems[0].link.replace('#', '') : null;
+        App.currentPage = App.navItems.length > 0 ? App.navItems[0].filename : null;
     }
     
     renderNavItems();
     updatePageSelector();
-    if (typeof renderBlocks === 'function') {
-        renderBlocks();
+    if (typeof renderLayers === 'function') {
+        renderLayers();
     }
-    if (typeof updateStructureTree === 'function') {
-        updateStructureTree();
+    if (typeof updateLayersList === 'function') {
+        updateLayersList();
     }
 }
 
@@ -351,18 +342,16 @@ function updatePageSelector() {
     }
     
     App.navItems.forEach(item => {
-        const pageName = item.link.replace('#', '');
         const option = document.createElement('option');
-        option.value = pageName;
-        option.textContent = item.label;
-        if (pageName === App.currentPage) {
+        option.value = item.filename;
+        option.textContent = item.label + ' (' + item.filename + '.html)';
+        if (item.filename === App.currentPage) {
             option.selected = true;
         }
         select.appendChild(option);
     });
 }
 
-// ===== BACKGROUND UI =====
 function updatePageBackgroundUI() {
     const page = App.currentPage;
     if (!page) return;
@@ -393,7 +382,7 @@ function updatePageCanvasBackground() {
     }
 }
 
-// Expose functions globally
+// Expose functions
 window.goToStep = goToStep;
 window.updatePageSelector = updatePageSelector;
 window.renderNavItems = renderNavItems;
