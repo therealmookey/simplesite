@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SimpleSite - Website Builder</title>
+    
+    <!-- Font Awesome (voor iconen) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- JSZip (voor ZIP download) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    
+    <!-- Eigen CSS (in assets/css map) -->
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+    <!-- HEADER (wordt ingeladen via JavaScript) -->
+    <div id="header-placeholder"></div>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+        <div class="container">
+            <!-- Sidebar met blokken -->
+            <aside class="sidebar">
+                <h3><i class="fas fa-puzzle-piece"></i> Blokken</h3>
+                <button class="block-btn" data-type="heading">
+                    <i class="fas fa-heading"></i> Koptekst (H1)
+                </button>
+                <button class="block-btn" data-type="text">
+                    <i class="fas fa-paragraph"></i> Tekstblok
+                </button>
+                <button class="block-btn" data-type="image">
+                    <i class="fas fa-image"></i> Afbeelding
+                </button>
+                <button class="block-btn" data-type="button">
+                    <i class="fas fa-link"></i> Knop met link
+                </button>
+                
+                <hr>
+                
+                <button class="btn btn-success btn-block" id="purchaseBtn">
+                    <i class="fas fa-shopping-cart"></i> Website Kopen (€49,-)
+                </button>
+            </aside>
+
+            <!-- Canvas (waar gebouwd wordt) -->
+            <section class="canvas-container" id="canvas">
+                <div class="empty-state" id="emptyState">
+                    <i class="fas fa-edit"></i>
+                    <h2>Start met bouwen!</h2>
+                    <p>Klik links op een blok om toe te voegen</p>
+                </div>
+                <div id="blocksContainer"></div>
+            </section>
+        </div>
+    </main>
+
+    <!-- FOOTER (wordt ingeladen via JavaScript) -->
+    <div id="footer-placeholder"></div>
+
+    <!-- BETALINGS MODAL -->
+    <div id="paymentModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2><i class="fas fa-credit-card"></i> Betaal voor jouw website</h2>
+            <div class="payment-details">
+                <p><strong>Product:</strong> SimpleSite Website</p>
+                <p><strong>Prijs:</strong> €49,- (eenmalig)</p>
+                <p><strong>Wat krijg je:</strong></p>
+                <ul>
+                    <li>✅ Complete HTML/CSS/JS bestanden</li>
+                    <li>✅ Eigen domein klaar om te uploaden</li>
+                    <li>✅ Alle blokken zoals jij ze hebt gemaakt</li>
+                    <li>✅ Geen verborgen kosten</li>
+                </ul>
+            </div>
+            <div class="payment-methods">
+                <button class="pay-btn" data-method="ideal">
+                    <i class="fas fa-university"></i> iDEAL
+                </button>
+                <button class="pay-btn" data-method="creditcard">
+                    <i class="fas fa-credit-card"></i> Creditcard
+                </button>
+                <button class="pay-btn" data-method="paypal">
+                    <i class="fab fa-paypal"></i> PayPal
+                </button>
+            </div>
+            <p class="payment-note">🔒 Veilige betaling - Simulatie modus</p>
+        </div>
+    </div>
+
+    <!-- Eigen JavaScript (in assets/js map) -->
+    <script src="assets/js/script.js"></script>
+</body>
+</html>
