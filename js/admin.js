@@ -565,3 +565,4 @@ function initSettings() {
     loadPageContent('home');
     setTimeout(updatePreview, 200);
 }
+// Laatste update: 2026
